@@ -1,24 +1,32 @@
 import csv
 import io
+import json
+import random
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from fastapi import Depends
 from app.core.database import get_db
+from app.models.forecast import Forecast
+from app.models.inventory import InventorySnapshot
 from app.models.sales import SalesRecord
 from app.models.sku import SKU
+from app.services.data_loader import load_pharma_sales_atc, load_supply_chain_inventory
 
 router = APIRouter(prefix="/upload", tags=["upload"])
 
 # In-memory staging store (keyed by file_id)
 _staged: dict[str, dict] = {}
+
+DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_PATH = DATA_DIR / "current_dataset.json"
 
 TEMPLATE_COLUMNS = ["date", "product_name", "quantity", "revenue", "geography", "channel"]
 TEMPLATE_EXAMPLES = [
@@ -64,7 +72,6 @@ async def upload_csv(file: UploadFile = File(...)) -> dict:
     file_id = str(uuid.uuid4())
     _staged[file_id] = {"df": df, "filename": file.filename}
 
-    # Detect date range
     date_col = None
     for col in df.columns:
         if any(kw in col.lower() for kw in ("date", "period", "week", "month", "time")):
@@ -125,7 +132,6 @@ def map_columns(payload: ColumnMapping) -> dict:
             if bad > 0:
                 errors.append(f"'{their_col}' has {bad} unparseable date values")
 
-    # Build preview with mapped column names
     rename = {v: k for k, v in payload.column_mapping.items() if v in df.columns}
     preview_df = df.head(5).rename(columns=rename).fillna("")
     preview = preview_df.to_dict(orient="records")
@@ -144,6 +150,7 @@ def ingest_data(payload: IngestRequest, db: Session = Depends(get_db)) -> dict:
         raise HTTPException(status_code=404, detail="File not found — upload first")
 
     df: pd.DataFrame = staged["df"].copy()
+    original_filename: str = staged["filename"]
     mapping = payload.column_mapping
 
     required = {"date", "product_name", "quantity"}
@@ -156,34 +163,36 @@ def ingest_data(payload: IngestRequest, db: Session = Depends(get_db)) -> dict:
     df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce")
     df = df.dropna(subset=["date", "quantity", "product_name"])
 
+    # Step 1: Delete all existing data in dependency order
+    db.query(Forecast).delete(synchronize_session=False)
+    db.query(InventorySnapshot).delete(synchronize_session=False)
+    db.query(SalesRecord).delete(synchronize_session=False)
+    db.query(SKU).delete(synchronize_session=False)
+    db.commit()
+
+    # Step 2: Create new SKUs from uploaded data
     unique_products = df["product_name"].unique()
     skus_created = 0
     sku_map: dict[str, int] = {}
 
-    # Create SKUs for new products
     for prod_name in unique_products:
-        existing = db.query(SKU).filter(SKU.name == str(prod_name)).first()
-        if existing:
-            sku_map[str(prod_name)] = existing.id
-        else:
-            code = f"UPL-{str(prod_name)[:10].upper().replace(' ', '_')}"
-            # Ensure unique code
-            i = 1
-            while db.query(SKU).filter(SKU.code == code).first():
-                code = f"UPL-{i}-{str(prod_name)[:8].upper().replace(' ', '_')}"
-                i += 1
-            sku = SKU(
-                code=code,
-                name=str(prod_name),
-                category=payload.organization_name,
-                therapeutic_area="Uploaded",
-            )
-            db.add(sku)
-            db.flush()
-            sku_map[str(prod_name)] = sku.id
-            skus_created += 1
+        code = f"UPL-{str(prod_name)[:10].upper().replace(' ', '_')}"
+        i = 1
+        while db.query(SKU).filter(SKU.code == code).first():
+            code = f"UPL-{i}-{str(prod_name)[:8].upper().replace(' ', '_')}"
+            i += 1
+        sku = SKU(
+            code=code,
+            name=str(prod_name),
+            category=payload.organization_name,
+            therapeutic_area="Uploaded",
+        )
+        db.add(sku)
+        db.flush()
+        sku_map[str(prod_name)] = sku.id
+        skus_created += 1
 
-    # Insert sales records
+    # Step 3: Insert new sales records
     records_inserted = 0
     for _, row in df.iterrows():
         prod = str(row["product_name"])
@@ -201,20 +210,91 @@ def ingest_data(payload: IngestRequest, db: Session = Depends(get_db)) -> dict:
         db.add(sr)
         records_inserted += 1
 
+    # Step 4: Create inventory snapshots for each new SKU
+    for prod_name, sku_id in sku_map.items():
+        current_stock = random.randint(50, 500)
+        snapshot = InventorySnapshot(
+            sku_id=sku_id,
+            warehouse_code="UPLOAD",
+            snapshot_at=datetime.utcnow(),
+            quantity_on_hand=float(current_stock),
+            quantity_reserved=0.0,
+            quantity_in_transit=0.0,
+            days_of_supply=0.0,
+            status="normal",
+        )
+        db.add(snapshot)
+
     db.commit()
 
     # Clean up staged data
     del _staged[payload.file_id]
 
-    # Date range of inserted data
-    min_d = df["date"].min().date().isoformat()
-    max_d = df["date"].max().date().isoformat()
+    first_date = df["date"].min().date().isoformat()
+    last_date = df["date"].max().date().isoformat()
 
+    # Step 5: Save dataset info file
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    dataset_info = {
+        "source": "custom",
+        "filename": original_filename,
+        "sku_count": skus_created,
+        "record_count": records_inserted,
+        "date_range_start": first_date,
+        "date_range_end": last_date,
+        "uploaded_at": datetime.utcnow().isoformat(),
+    }
+    with open(DATA_PATH, "w") as f:
+        json.dump(dataset_info, f)
+
+    # Step 6: Return result
     return {
+        "message": f"Successfully imported {records_inserted} records for {skus_created} SKUs",
         "skus_created": skus_created,
         "records_inserted": records_inserted,
-        "date_range": f"{min_d} to {max_d}",
-        "organization": payload.organization_name,
+        "date_range": f"{first_date} to {last_date}",
+    }
+
+
+@router.get("/current-dataset")
+def get_current_dataset() -> dict:
+    try:
+        with open(DATA_PATH, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {
+            "source": "demo",
+            "sku_count": 8,
+            "record_count": 16848,
+            "date_range_start": "2014-01-02",
+            "date_range_end": "2019-10-08",
+            "uploaded_at": None,
+        }
+
+
+@router.post("/reset-demo")
+def reset_to_demo(db: Session = Depends(get_db)) -> dict:
+    # Delete all data in dependency order
+    db.query(Forecast).delete(synchronize_session=False)
+    db.query(InventorySnapshot).delete(synchronize_session=False)
+    db.query(SalesRecord).delete(synchronize_session=False)
+    db.query(SKU).delete(synchronize_session=False)
+    db.commit()
+
+    # Re-seed pharma sales and inventory snapshots
+    result = load_pharma_sales_atc(db)
+    n_snapshots = load_supply_chain_inventory(db)
+
+    # Remove custom dataset marker
+    try:
+        DATA_PATH.unlink()
+    except FileNotFoundError:
+        pass
+
+    return {
+        "message": "Reset to demo data complete",
+        "skus_created": result["skus_created"],
+        "records_inserted": result["records_inserted"],
     }
 
 

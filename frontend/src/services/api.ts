@@ -414,6 +414,16 @@ export interface IngestResponse {
   organization: string
 }
 
+export interface CurrentDatasetInfo {
+  source: 'demo' | 'custom'
+  filename?: string
+  sku_count: number
+  record_count: number
+  date_range_start: string
+  date_range_end: string
+  uploaded_at: string | null
+}
+
 export const uploadApi = {
   uploadFile: (file: File) => {
     const form = new FormData()
@@ -435,4 +445,8 @@ export const uploadApi = {
     }),
   downloadTemplate: () =>
     api.get('/upload/template', { responseType: 'blob' }),
+  getCurrentDataset: () =>
+    api.get<CurrentDatasetInfo>('/upload/current-dataset'),
+  resetToDemo: () =>
+    api.post<{ message: string; skus_created: number; records_inserted: number }>('/upload/reset-demo'),
 }

@@ -1,6 +1,6 @@
-import { type CSSProperties, useCallback, useRef, useState } from 'react'
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { uploadApi, type MapColumnsResponse, type UploadResponse } from '../../services/api'
+import { uploadApi, type CurrentDatasetInfo, type MapColumnsResponse, type UploadResponse } from '../../services/api'
 
 type Step = 1 | 2 | 3
 
@@ -22,6 +22,62 @@ const card: CSSProperties = {
   border: '1px solid #e2e8f0',
   borderRadius: '16px',
   boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+}
+
+// ---- Dataset Banner -------------------------------------------------
+
+function DatasetBanner() {
+  const [info, setInfo] = useState<CurrentDatasetInfo | null>(null)
+  const [resetting, setResetting] = useState(false)
+
+  useEffect(() => {
+    uploadApi.getCurrentDataset().then((r) => setInfo(r.data)).catch(() => {})
+  }, [])
+
+  if (!info || info.source === 'demo') return null
+
+  async function handleReset() {
+    setResetting(true)
+    try {
+      await uploadApi.resetToDemo()
+      setInfo(null)
+    } catch {
+      // silently fail — user can retry
+    } finally {
+      setResetting(false)
+    }
+  }
+
+  return (
+    <div style={{
+      marginBottom: 24, padding: '16px 20px', borderRadius: 14,
+      backgroundColor: 'rgba(0,212,180,0.06)', border: '1px solid rgba(0,212,180,0.25)',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 20 }}>📁</span>
+        <div>
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', margin: 0, marginBottom: 2 }}>
+            Custom dataset active: <span style={{ color: '#00D4B4' }}>{info.filename ?? 'Uploaded file'}</span>
+          </p>
+          <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>
+            {info.sku_count} SKUs · {info.record_count.toLocaleString()} records · {info.date_range_start} to {info.date_range_end}
+          </p>
+        </div>
+      </div>
+      <button
+        onClick={handleReset}
+        disabled={resetting}
+        style={{
+          padding: '8px 16px', borderRadius: 10, border: '1px solid rgba(239,68,68,0.3)',
+          backgroundColor: 'rgba(239,68,68,0.06)', color: '#ef4444', fontSize: 13, fontWeight: 600,
+          cursor: resetting ? 'not-allowed' : 'pointer', opacity: resetting ? 0.6 : 1, whiteSpace: 'nowrap',
+        }}
+      >
+        {resetting ? 'Resetting...' : '↩ Reset to Demo Data'}
+      </button>
+    </div>
+  )
 }
 
 // ---- Step bar -------------------------------------------------------
@@ -371,6 +427,12 @@ function Step3Confirm({ upload, mapping, onBack }: { upload: UploadResponse; map
     }
   }
 
+  useEffect(() => {
+    if (!done) return
+    const t = setTimeout(() => navigate('/forecast'), 2000)
+    return () => clearTimeout(t)
+  }, [done, navigate])
+
   if (done) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, padding: '32px 0', textAlign: 'center' }}>
@@ -388,6 +450,7 @@ function Step3Confirm({ upload, mapping, onBack }: { upload: UploadResponse; map
           ))}
         </div>
         <p style={{ fontSize: 13, color: '#94a3b8' }}>Date range: {done.date_range}</p>
+        <p style={{ fontSize: 12, color: '#94a3b8' }}>Redirecting to Forecast Engine in 2 seconds…</p>
         <button
           onClick={() => navigate('/forecast')}
           style={{ padding: '12px 32px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#00D4B4,#0099a8)', color: '#0A1628', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
@@ -486,6 +549,9 @@ export default function Upload() {
           <h1 style={{ fontSize: 28, fontWeight: 700, color: '#0f172a', margin: 0 }}>Upload Data</h1>
           <p style={{ fontSize: 14, color: '#94a3b8', marginTop: 6 }}>Import your CSV or XLSX sales data into PulseChain</p>
         </div>
+
+        {/* Current dataset banner */}
+        <DatasetBanner />
 
         {/* Step bar */}
         <StepBar current={step} />

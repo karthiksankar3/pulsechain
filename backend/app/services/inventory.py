@@ -86,10 +86,19 @@ def _latest_snapshot(sku_id: int, db: Session) -> InventorySnapshot | None:
 
 
 def calculate_dos(sku_id: int, db: Session) -> float:
-    qtys = _daily_quantities(sku_id, db, 90)
-    if not qtys:
+    records = (
+        db.query(SalesRecord)
+        .filter(SalesRecord.sku_id == sku_id)
+        .order_by(SalesRecord.sale_date)
+        .all()
+    )
+    if not records:
         return 0.0
-    avg_daily = sum(qtys) / 90
+    total_quantity = sum(r.quantity for r in records)
+    min_date = records[0].sale_date
+    max_date = records[-1].sale_date
+    actual_days = (max_date - min_date).days or 1
+    avg_daily = total_quantity / actual_days
     if avg_daily <= 0:
         return 0.0
     snapshot = _latest_snapshot(sku_id, db)

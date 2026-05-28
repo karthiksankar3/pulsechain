@@ -23,6 +23,7 @@ class ForecastResult:
     upper_bound: list[float]
     mape: float
     feature_importance: dict = field(default_factory=dict)
+    warning: str | None = None
 
 
 def _mape(actual: np.ndarray, predicted: np.ndarray) -> float:
@@ -63,8 +64,9 @@ class ForecastingEngine:
             .order_by(SalesRecord.sale_date)
             .all()
         )
-        if not rows:
-            return pd.DataFrame(columns=["ds", "y"])
+
+        if len(rows) < 14:
+            raise ValueError("Insufficient data — minimum 14 days required")
 
         df = pd.DataFrame(rows, columns=["ds", "y"])
         df["ds"] = pd.to_datetime(df["ds"])
@@ -73,12 +75,64 @@ class ForecastingEngine:
         df = df.groupby("ds", as_index=False)["y"].sum()
         df = df.sort_values("ds").reset_index(drop=True)
 
+        # Cap for performance: if 90+ raw rows, use last 365 calendar days only
+        if len(rows) >= 90:
+            cutoff = df["ds"].max() - pd.Timedelta(days=365)
+            df = df[df["ds"] >= cutoff].reset_index(drop=True)
+
         # Fill missing dates
         full_range = pd.date_range(df["ds"].min(), df["ds"].max(), freq="D")
         df = df.set_index("ds").reindex(full_range).rename_axis("ds").reset_index()
         df["y"] = df["y"].ffill().fillna(0.0)
 
         return df
+
+    # ------------------------------------------------------------------ #
+    # Model selector                                                       #
+    # ------------------------------------------------------------------ #
+
+    def select_model_for_data(self, df: pd.DataFrame) -> str:
+        n = len(df)
+        if n < 14:
+            raise ValueError("Insufficient data")
+        if n < 30:
+            return "moving_average"
+        if n < 60:
+            return "arima"
+        return "full"
+
+    # ------------------------------------------------------------------ #
+    # Moving average (short data fallback)                                 #
+    # ------------------------------------------------------------------ #
+
+    def run_moving_average(
+        self,
+        df: pd.DataFrame,
+        horizon_days: int = 90,
+        sku_id: int = 0,
+    ) -> ForecastResult:
+        last_val = float(df["y"].tail(7).mean())
+        std = float(df["y"].std()) if len(df) > 1 else last_val * 0.1
+        last_date = df["ds"].max()
+
+        dates = [
+            str((pd.Timestamp(last_date) + timedelta(days=i + 1)).date())
+            for i in range(horizon_days)
+        ]
+        forecast = [round(last_val, 4)] * horizon_days
+        lower = [round(max(last_val - 1.5 * std, 0), 4)] * horizon_days
+        upper = [round(last_val + 1.5 * std, 4)] * horizon_days
+
+        return ForecastResult(
+            model_name="moving_average",
+            sku_id=sku_id,
+            dates=dates,
+            forecast=forecast,
+            lower_bound=lower,
+            upper_bound=upper,
+            mape=0.0,
+            warning="Limited data — simplified model used",
+        )
 
     # ------------------------------------------------------------------ #
     # Prophet                                                              #
@@ -111,14 +165,12 @@ class ForecastingEngine:
             warnings.simplefilter("ignore")
             m.fit(train)
 
-        # Validation MAPE on holdout
         val_future = m.make_future_dataframe(periods=len(val), freq="D")
         val_future = val_future.tail(len(val))
         val_pred = m.predict(val_future)["yhat"].values
         val_actual = val["y"].values
         holdout_mape = _mape(val_actual, np.maximum(val_pred, 0))
 
-        # Full forecast
         m2 = Prophet(
             yearly_seasonality=True,
             weekly_seasonality=True,
@@ -180,12 +232,10 @@ class ForecastingEngine:
             except Exception:
                 continue
 
-        # Validate on holdout
         val_model = ARIMA(train_y, order=best_order).fit()
         val_pred = val_model.forecast(steps=len(val_y))
         holdout_mape = _mape(val_y, np.maximum(val_pred, 0))
 
-        # Refit on full data
         full_model = ARIMA(df["y"].values, order=best_order).fit()
         fc = full_model.get_forecast(steps=horizon_days)
         yhat = fc.predicted_mean
@@ -263,10 +313,8 @@ class ForecastingEngine:
         holdout_mape = _mape(val_actual, val_pred)
         residual_std = float(np.std(val_actual - val_pred))
 
-        # Feature importance
         importance = dict(zip(feature_cols, model.feature_importances_.tolist()))
 
-        # Recursive future forecasting
         history = df["y"].values.tolist()
         last_date = df["ds"].max()
         future_dates: list[date] = []
@@ -323,7 +371,28 @@ class ForecastingEngine:
         horizon_days: int = 90,
     ) -> ForecastResult:
         df = self.prepare_time_series(db, sku_id)
+        data_len = len(df)
 
+        # Short-series paths
+        if data_len < 30:
+            result = self.run_moving_average(df, horizon_days, sku_id)
+            result.model_name = "ensemble"
+            result.warning = "Limited data — simplified model used"
+            return result
+
+        if data_len < 60:
+            try:
+                result = self.run_arima(df, horizon_days=horizon_days, sku_id=sku_id)
+                result.model_name = "ensemble"
+                result.warning = "Limited data — ARIMA only"
+                return result
+            except Exception:
+                result = self.run_moving_average(df, horizon_days, sku_id)
+                result.model_name = "ensemble"
+                result.warning = "Limited data — simplified model used"
+                return result
+
+        # Full Prophet + XGBoost + ARIMA ensemble
         results: list[ForecastResult] = []
         for runner in (self.run_prophet, self.run_arima, self.run_xgboost):
             try:
@@ -340,23 +409,23 @@ class ForecastingEngine:
         inv = 1.0 / mapes
         weights = inv / inv.sum()
 
-        n = len(results[0].dates)
-        blended = np.zeros(n)
-        blended_lower = np.zeros(n)
-        blended_upper = np.zeros(n)
+        n_dates = len(results[0].dates)
+        blended = np.zeros(n_dates)
+        blended_lower = np.zeros(n_dates)
+        blended_upper = np.zeros(n_dates)
 
         for w, r in zip(weights, results):
-            arr = np.array(r.forecast[:n])
+            arr = np.array(r.forecast[:n_dates])
             blended += w * arr
-            blended_lower += w * np.array(r.lower_bound[:n])
-            blended_upper += w * np.array(r.upper_bound[:n])
+            blended_lower += w * np.array(r.lower_bound[:n_dates])
+            blended_upper += w * np.array(r.upper_bound[:n_dates])
 
         ensemble_mape = float(np.dot(weights, mapes))
 
         return ForecastResult(
             model_name="ensemble",
             sku_id=sku_id,
-            dates=results[0].dates[:n],
+            dates=results[0].dates[:n_dates],
             forecast=[round(float(v), 4) for v in blended],
             lower_bound=[round(max(float(v), 0), 4) for v in blended_lower],
             upper_bound=[round(float(v), 4) for v in blended_upper],
@@ -390,7 +459,7 @@ class ForecastingEngine:
                 result = self.run_arima(df, horizon_days=len(val_df), sku_id=sku_id)
             elif model_name == "xgboost":
                 result = self.run_xgboost(df, horizon_days=len(val_df), sku_id=sku_id)
-            else:  # ensemble
+            else:
                 result = self.run_ensemble(db, sku_id, horizon_days=len(val_df))
         except Exception:
             result = self._fallback(df, len(val_df), model_name, sku_id)
