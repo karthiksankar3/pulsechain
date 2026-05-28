@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 1440
     database_url: str = "postgresql://pulsechain:pulsechain@localhost:5432/pulsechain"
     allowed_origins: list[str] = [
+        "https://cozy-fulfillment-production-f71f.up.railway.app",
+        "https://pulsechain-production-7896.up.railway.app",
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:5175",
