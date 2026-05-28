@@ -118,6 +118,7 @@ function AlertFeed({ alerts, loading }: { alerts: Alert[]; loading: boolean }) {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const userName = localStorage.getItem('pulsechain_user_name') || 'User'
   const [health, setHealth] = useState<InventoryHealthData | null>(null)
   const [inventory, setInventory] = useState<InventorySKU[]>([])
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([])
@@ -198,7 +199,7 @@ export default function Dashboard() {
       {/* Welcome banner — no card wrapper */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-          {greeting()}, Karthik 👋
+          {greeting()}, {userName} 👋
         </h1>
         <p style={{ fontSize: '14px', color: '#64748b', marginTop: '6px' }}>
           {today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
