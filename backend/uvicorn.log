@@ -2,3 +2,140 @@ INFO:     Started server process [20304]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+🚀 PulseChain startup — seeding demo data...
+📊 Sales records already present (16,848 rows) — skipping seed.
+📦 Inventory snapshots already present (8) — skipping seed.
+✅ Startup complete.
+INFO:     127.0.0.1:49465 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49464 - "GET /social/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49274 - "GET /social/ticker HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49275 - "GET /social/news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49276 - "GET /social/forecast-adjustments HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58805 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59341 - "GET /social/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59343 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59345 - "GET /social/forecast-adjustments HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59360 - "POST /scenarios/run HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57135 - "GET /inventory/abc-xyz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57135 - "GET /inventory/abc-xyz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61709 - "GET /inventory/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49432 - "GET /inventory/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52007 - "GET /inventory/safety-stock/6?service_level=0.95 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61709 - "GET /inventory/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57135 - "GET /inventory/skus/6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49432 - "GET /inventory/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55291 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55291 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+Importing plotly failed. Interactive plots will not work.
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+INFO:     127.0.0.1:61320 - "GET /inventory/abc-xyz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /inventory/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61320 - "GET /inventory/abc-xyz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63242 - "GET /inventory/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64737 - "GET /inventory/safety-stock/6?service_level=0.95 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /inventory/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61320 - "GET /inventory/skus/6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /social/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64737 - "GET /social/news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61320 - "GET /social/ticker HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /social/reddit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61320 - "GET /social/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /social/news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61320 - "GET /social/ticker HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /social/reddit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64737 - "GET /social/forecast-adjustments HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63242 - "GET /inventory/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /social/forecast-adjustments HTTP/1.1" 200 OK
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:63242 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64737 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /forecasting/skus/1/latest?model_name=ensemble&horizon_days=90 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+INFO:     127.0.0.1:55533 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50474 - "GET /social/ticker HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50474 - "GET /social/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56479 - "GET /inventory/abc-xyz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50474 - "GET /social/news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56479 - "GET /social/reddit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56479 - "GET /social/ticker HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56479 - "GET /social/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50474 - "GET /social/forecast-adjustments HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50474 - "GET /social/news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50474 - "GET /social/reddit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /inventory/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56479 - "GET /inventory/abc-xyz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50474 - "GET /social/forecast-adjustments HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55533 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50474 - "GET /forecasting/skus HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:54190 - "GET /inventory/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56479 - "GET /inventory/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54190 - "GET /inventory/skus HTTP/1.1" 200 OK
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:64737 - "GET /forecasting/skus/1/latest?model_name=ensemble&horizon_days=90 HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:64737 - "GET /forecasting/skus/1/latest?model_name=ensemble&horizon_days=90 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55291 - "GET /forecasting/skus/1/accuracy HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:55291 - "GET /forecasting/skus/1/accuracy HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:58440 - "GET /forecasting/skus/1/accuracy HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50069 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50069 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56313 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56313 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53640 - "GET /social/reddit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62697 - "GET /social/ticker HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50783 - "GET /social/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64942 - "GET /social/news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62697 - "GET /social/ticker HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64942 - "GET /social/news HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53640 - "GET /social/reddit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50783 - "GET /social/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51465 - "GET /social/forecast-adjustments HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51465 - "GET /social/forecast-adjustments HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61530 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61530 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61530 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61530 - "GET /scenarios/templates HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52441 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52441 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64216 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64216 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:52441 - "GET /forecasting/skus/1/latest?model_name=ensemble&horizon_days=90 HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:52578 - "GET /forecasting/skus/1/accuracy HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52699 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61621 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:57809 - "GET /forecasting/skus/1/latest?model_name=ensemble&horizon_days=90 HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:54124 - "GET /forecasting/skus/1/accuracy HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55986 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55986 - "GET /forecasting/skus HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59966 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59966 - "GET /forecasting/portfolio HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:55986 - "GET /forecasting/skus/1/latest?model_name=ensemble&horizon_days=90 HTTP/1.1" 200 OK
+⚠️  run_prophet failed for sku 1: `np.float_` was removed in the NumPy 2.0 release. Use `np.float64` instead.
+⚠️  run_arima failed for sku 1: 'numpy.ndarray' object has no attribute 'iloc'
+INFO:     127.0.0.1:59966 - "GET /forecasting/skus/1/accuracy HTTP/1.1" 200 OK
