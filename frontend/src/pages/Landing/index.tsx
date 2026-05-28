@@ -1,161 +1,138 @@
+import { type CSSProperties, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const FEATURES = [
-  {
-    icon: '🤖',
-    title: 'AI Forecasting',
-    desc: 'Prophet + XGBoost + Ensemble models with inverse-MAPE weighting for pharma-grade accuracy.',
-    color: '#00D4B4',
-  },
-  {
-    icon: '📦',
-    title: 'Inventory Intelligence',
-    desc: 'Safety stock optimization, expiry risk detection, and ABC-XYZ segmentation.',
-    color: '#FF6B35',
-  },
-  {
-    icon: '📡',
-    title: 'PharmaPulse Signals',
-    desc: 'Real-time Google Trends, Reddit, and news signal aggregation into demand forecasts.',
-    color: '#a78bfa',
-  },
-  {
-    icon: '🔀',
-    title: 'Scenario Planning',
-    desc: '6 pre-built scenarios: epidemic outbreak, drug shortage, competitor launch, regulatory hold, and more.',
-    color: '#60a5fa',
-  },
-  {
-    icon: '🗓️',
-    title: 'S&OP Console',
-    desc: 'Consensus forecasting, version comparison, and SAP-APO compatible export.',
-    color: '#f59e0b',
-  },
-  {
-    icon: '⬆️',
-    title: 'File Upload',
-    desc: 'Bring your own CSV/XLSX data with guided column mapping wizard.',
-    color: '#10b981',
-  },
+  { icon: '🤖', title: 'AI Forecasting', desc: 'Prophet + XGBoost + Ensemble models with inverse-MAPE weighting for pharma-grade accuracy.' },
+  { icon: '📦', title: 'Inventory Intelligence', desc: 'Safety stock optimization, expiry risk detection, and ABC-XYZ segmentation.' },
+  { icon: '🔥', title: 'PharmaPulse Signals', desc: 'Google Trends, Reddit, and news signal aggregation into demand forecasts.' },
+  { icon: '🔀', title: 'Scenario Planning', desc: '6 pre-built scenarios: epidemic outbreak, tender win, competitor launch, and more.' },
+  { icon: '📋', title: 'S&OP Console', desc: 'Consensus forecasting, version comparison, and SAP-APO compatible export.' },
+  { icon: '⬆️', title: 'File Upload', desc: 'Bring your own CSV/XLSX data with guided column mapping wizard.' },
 ]
 
-const DATASETS = [
-  { name: 'ATC Pharma Sales', desc: '8 drug categories, 16,848 records' },
-  { name: 'Rossmann Sales', desc: 'Multi-store retail dataset' },
-  { name: 'Supply Chain Set', desc: 'Pharmaceutical supply chain data' },
+const STATS = [
+  { number: '16,848', label: 'Sales Records' },
+  { number: '8', label: 'ATC Drug SKUs' },
+  { number: '6', label: 'Years of Data' },
 ]
 
-const TECH = [
-  { name: 'Python 3.11', icon: '🐍' },
-  { name: 'FastAPI', icon: '⚡' },
-  { name: 'Prophet', icon: '📊' },
-  { name: 'PostgreSQL', icon: '🐘' },
-  { name: 'React 18', icon: '⚛️' },
-  { name: 'XGBoost', icon: '🚀' },
+const TECH_BADGES = [
+  'Python 3.11', 'FastAPI', 'Prophet', 'XGBoost',
+  'PostgreSQL', 'React', 'Tailwind CSS', 'Docker', 'Railway',
 ]
+
+function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        backgroundColor: '#ffffff',
+        border: `1px solid ${hovered ? 'rgba(0,212,180,0.4)' : '#e2e8f0'}`,
+        borderRadius: 20,
+        padding: 28,
+        boxShadow: hovered ? '0 4px 16px rgba(0,212,180,0.10)' : '0 1px 3px rgba(0,0,0,0.06)',
+        transition: 'all 0.2s',
+      }}
+    >
+      <div style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: '#f0fdf9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, marginBottom: 20 }}>
+        {icon}
+      </div>
+      <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>{title}</h3>
+      <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.65 }}>{desc}</p>
+    </div>
+  )
+}
 
 export default function Landing() {
   const navigate = useNavigate()
 
+  const navBtnOutline: CSSProperties = {
+    padding: '8px 20px', borderRadius: 12, border: '1px solid #e2e8f0',
+    backgroundColor: '#fff', color: '#0f172a', fontSize: 14, fontWeight: 600,
+    cursor: 'pointer', transition: 'all 0.15s',
+  }
+
+  const navBtnFill: CSSProperties = {
+    padding: '8px 20px', borderRadius: 12, border: 'none',
+    backgroundColor: '#00D4B4', color: '#0A1628', fontSize: 14, fontWeight: 700,
+    cursor: 'pointer', transition: 'all 0.15s',
+  }
+
   return (
-    <div
-      className="min-h-screen overflow-x-hidden"
-      style={{ backgroundColor: '#0A1628', color: '#fff', fontFamily: 'Sora, DM Sans, sans-serif' }}
-    >
+    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', overflowX: 'hidden', fontFamily: "'DM Sans', 'Sora', sans-serif" }}>
+
       {/* Navbar */}
-      <header
-        className="sticky top-0 z-50 flex items-center justify-between px-8 py-4"
-        style={{ backgroundColor: 'rgba(10,22,40,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-xl font-bold" style={{ color: '#00D4B4' }}>PulseChain</span>
-          <span className="rounded-full px-2.5 py-0.5 text-xs font-medium" style={{ backgroundColor: 'rgba(0,212,180,0.12)', color: '#00D4B4', border: '1px solid rgba(0,212,180,0.25)' }}>
+      <header style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        height: 60, backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 40px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 20, fontWeight: 700, color: '#00D4B4', letterSpacing: '-0.02em' }}>PulseChain</span>
+          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, backgroundColor: 'rgba(0,212,180,0.10)', color: '#00D4B4', border: '1px solid rgba(0,212,180,0.25)' }}>
             Beta
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="rounded-lg px-4 py-2 text-sm font-medium transition-all hover:opacity-80"
-            style={{ color: '#94a3b8' }}
-          >
-            Log in
-          </button>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="rounded-lg px-4 py-2 text-sm font-semibold transition-all hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #00D4B4, #0099a8)', color: '#0A1628' }}
-          >
-            Get Started
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button onClick={() => navigate('/dashboard')} style={navBtnOutline}>Log in</button>
+          <button onClick={() => navigate('/dashboard')} style={navBtnFill}>Get Started</button>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="relative flex flex-col items-center px-8 pb-24 pt-24 text-center">
-        {/* ECG / pulse animation background */}
-        <svg
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.06]"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          aria-hidden
-        >
-          <path
-            d="M0,200 L200,200 L250,100 L300,300 L350,150 L400,200 L600,200 L650,80 L700,320 L750,180 L800,200 L1400,200"
-            fill="none"
-            stroke="#00D4B4"
-            strokeWidth="3"
-          >
-            <animateTransform
-              attributeName="transform"
-              type="translate"
-              from="0 0"
-              to="-800 0"
-              dur="6s"
-              repeatCount="indefinite"
-            />
-          </path>
-        </svg>
-
-        <div className="relative max-w-3xl">
-          <div
-            className="mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider"
-            style={{ backgroundColor: 'rgba(0,212,180,0.1)', color: '#00D4B4', border: '1px solid rgba(0,212,180,0.25)' }}
-          >
+      <section style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+        paddingTop: 80, paddingBottom: 80, paddingLeft: 40, paddingRight: 40,
+        background: 'radial-gradient(ellipse 80% 50% at 50% 40%, rgba(0,212,180,0.07) 0%, transparent 70%), #ffffff',
+      }}>
+        <div style={{ maxWidth: 720 }}>
+          {/* Eyebrow */}
+          <p style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#00D4B4', marginBottom: 20 }}>
             Pharma Demand Planning Platform
-          </div>
-
-          <h1 className="text-5xl font-bold leading-tight tracking-tight text-white" style={{ letterSpacing: '-0.02em' }}>
-            From Market Signal to<br />
-            <span style={{ color: '#00D4B4' }}>Supply Decision</span>
-          </h1>
-
-          <p className="mt-6 text-xl leading-relaxed" style={{ color: 'rgba(148,163,184,0.85)' }}>
-            AI-powered demand forecasting, inventory intelligence, and S&amp;OP automation
-            built specifically for pharmaceutical supply chains.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          {/* Headline */}
+          <h1 style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, color: '#0f172a', margin: 0, letterSpacing: '-0.03em' }}>
+            From Market Signal to
+          </h1>
+          <h1 style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, color: '#00D4B4', margin: 0, marginBottom: 20, letterSpacing: '-0.03em' }}>
+            Supply Decision
+          </h1>
+
+          {/* Subheading */}
+          <p style={{ fontSize: 18, color: '#64748b', maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>
+            AI-powered demand forecasting, inventory intelligence, and S&OP automation built specifically for pharmaceutical supply chains.
+          </p>
+
+          {/* CTA buttons */}
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 40, flexWrap: 'wrap' }}>
             <button
               onClick={() => navigate('/dashboard')}
-              className="rounded-xl px-8 py-3.5 text-base font-semibold shadow-lg transition-all hover:scale-105 hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #00D4B4, #0099a8)', color: '#0A1628' }}
+              style={{ backgroundColor: '#00D4B4', color: '#0A1628', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,212,180,0.25)', transition: 'all 0.15s' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.9' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
             >
               Get Started — Free
             </button>
             <button
               onClick={() => navigate('/forecast')}
-              className="rounded-xl border px-8 py-3.5 text-base font-semibold transition-all hover:bg-white/5"
-              style={{ borderColor: 'rgba(255,255,255,0.2)', color: '#fff' }}
+              style={{ backgroundColor: '#fff', color: '#0f172a', fontWeight: 600, fontSize: 16, padding: '16px 32px', borderRadius: 16, border: '2px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.15s' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#00D4B4' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#e2e8f0' }}
             >
               View Demo
             </button>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: 'rgba(148,163,184,0.6)' }}>
+          {/* Trust line */}
+          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginTop: 24, flexWrap: 'wrap' }}>
             {['8 Drug SKUs included', '16,848 sales records', 'No credit card required'].map((t) => (
-              <span key={t} className="flex items-center gap-1.5">
-                <span style={{ color: '#00D4B4' }}>✓</span> {t}
+              <span key={t} style={{ fontSize: 13, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: '#00D4B4', fontWeight: 700 }}>✓</span> {t}
               </span>
             ))}
           </div>
@@ -163,103 +140,99 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section className="px-8 pb-24">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="mb-2 text-center text-3xl font-bold text-white">Everything you need to plan smarter</h2>
-          <p className="mb-12 text-center" style={{ color: 'rgba(148,163,184,0.7)' }}>
-            Six integrated modules — from AI forecasting to SAP export
+      <section style={{ backgroundColor: '#f8fafc', padding: '80px 40px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <p style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.10em', color: '#00D4B4', textAlign: 'center', marginBottom: 12 }}>
+            Everything you need to plan smarter
           </p>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 style={{ fontSize: 40, fontWeight: 800, color: '#0f172a', textAlign: 'center', margin: 0, marginBottom: 8, letterSpacing: '-0.02em' }}>
+            Six integrated modules
+          </h2>
+          <p style={{ fontSize: 16, color: '#64748b', textAlign: 'center', marginBottom: 48, marginTop: 0 }}>
+            From AI forecasting to SAP export
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
             {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-6 hover:border-[#00D4B4]/30 transition-colors"
-              >
-                <div className="text-3xl mb-4">{f.icon}</div>
-                <h3 className="text-base font-semibold text-white mb-2">{f.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
-              </div>
+              <FeatureCard key={f.title} {...f} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Datasets */}
-      <section className="border-t border-b px-8 py-16" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-        <div className="mx-auto max-w-5xl">
-          <h2 className="mb-2 text-center text-2xl font-bold text-white">Powered by real pharma data</h2>
-          <p className="mb-10 text-center" style={{ color: 'rgba(148,163,184,0.65)' }}>
+      {/* Data section */}
+      <section style={{ backgroundColor: '#ffffff', padding: '60px 40px' }}>
+        <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 32, fontWeight: 700, color: '#0f172a', margin: 0, marginBottom: 12, letterSpacing: '-0.02em' }}>
+            Powered by real pharma data
+          </h2>
+          <p style={{ fontSize: 15, color: '#64748b', marginBottom: 40 }}>
             Pre-loaded with industry datasets — or bring your own
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {DATASETS.map((d) => (
-              <div
-                key={d.name}
-                className="rounded-xl px-6 py-4 text-center"
-                style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', minWidth: 180 }}
-              >
-                <p className="font-semibold text-white">{d.name}</p>
-                <p className="mt-0.5 text-xs" style={{ color: 'rgba(148,163,184,0.6)' }}>{d.desc}</p>
+          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {STATS.map((s) => (
+              <div key={s.label} style={{ flex: 1, minWidth: 160, backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: 20, padding: '24px 20px', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                <p style={{ fontSize: 40, fontWeight: 700, color: '#00D4B4', margin: 0, marginBottom: 8, letterSpacing: '-0.02em' }}>{s.number}</p>
+                <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>{s.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Tech Stack */}
-      <section className="px-8 py-16">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="mb-2 text-center text-2xl font-bold text-white">Built with enterprise-grade technology</h2>
-          <p className="mb-10 text-center" style={{ color: 'rgba(148,163,184,0.65)' }}>
-            Production-ready stack with ML pipelines and real-time data
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {TECH.map((t) => (
-              <div
-                key={t.name}
-                className="flex items-center gap-2.5 rounded-xl px-5 py-3"
-                style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <span className="text-xl">{t.icon}</span>
-                <span className="text-sm font-medium text-white">{t.name}</span>
+      {/* Tech stack */}
+      <section style={{ backgroundColor: '#f8fafc', padding: '60px 40px' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: '#0f172a', margin: 0, marginBottom: 40, letterSpacing: '-0.02em' }}>
+            Built with enterprise-grade technology
+          </h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
+            {TECH_BADGES.map((t) => (
+              <div key={t} style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '10px 20px', fontSize: 14, fontWeight: 600, color: '#0f172a', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                {t}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section
-        className="px-8 py-20 text-center"
-        style={{
-          background: 'linear-gradient(135deg, rgba(0,212,180,0.08) 0%, rgba(255,107,53,0.05) 100%)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        <div className="mx-auto max-w-2xl">
-          <h2 className="mb-4 text-3xl font-bold text-white">
+      {/* CTA section */}
+      <section style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0d2040 100%)', padding: '80px 40px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 40, fontWeight: 700, color: '#ffffff', margin: 0, marginBottom: 12, letterSpacing: '-0.02em' }}>
             Ready to transform your demand planning?
           </h2>
-          <p className="mb-8 text-lg" style={{ color: 'rgba(148,163,184,0.75)' }}>
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)', margin: 0, marginBottom: 32 }}>
             Start with 8 pre-loaded pharma SKUs or upload your own data.
           </p>
           <button
             onClick={() => navigate('/dashboard')}
-            className="rounded-xl px-10 py-4 text-lg font-bold shadow-xl transition-all hover:scale-105 hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #00D4B4, #0099a8)', color: '#0A1628' }}
+            style={{ backgroundColor: '#00D4B4', color: '#0A1628', fontWeight: 700, fontSize: 16, padding: '16px 40px', borderRadius: 16, border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.9' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
           >
-            Start Free →
+            Start Free — No credit card required
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer
-        className="px-8 py-8 text-center text-sm"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.06)', color: 'rgba(148,163,184,0.45)' }}
-      >
-        PulseChain © {new Date().getFullYear()} · Pharma Demand Planning Platform
+      <footer style={{ backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0', padding: '24px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#00D4B4' }}>PulseChain</span>
+          <span style={{ fontSize: 12, color: '#94a3b8' }}>© {new Date().getFullYear()} All rights reserved</span>
+        </div>
+        <a
+          href="https://github.com/karthiksankar3/pulsechain"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: 14, color: '#64748b', textDecoration: 'none', transition: 'color 0.15s' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#00D4B4' }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#64748b' }}
+        >
+          github.com/karthiksankar3/pulsechain
+        </a>
       </footer>
+
     </div>
   )
 }
