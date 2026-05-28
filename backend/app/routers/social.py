@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_session_id
 from app.models.sku import SKU
 from app.social.demand_signal_index import DemandSignalEngine
 from app.social.google_trends import GoogleTrendsService
@@ -19,6 +20,13 @@ _engine = DemandSignalEngine()
 _trends = GoogleTrendsService()
 _news = NewsAPIService()
 _reddit = RedditService()
+
+
+def _session_skus(session_id: str, db: Session) -> list[SKU]:
+    skus = db.query(SKU).filter(SKU.session_id == session_id).all()
+    if not skus and session_id != "demo":
+        skus = db.query(SKU).filter(SKU.session_id == "demo").all()
+    return skus
 
 
 @router.get("/trends")
@@ -51,11 +59,18 @@ def get_reddit() -> dict:
 
 
 @router.get("/forecast-adjustment/{sku_id}")
-def get_forecast_adjustment(sku_id: int, db: Session = Depends(get_db)) -> dict:
+def get_forecast_adjustment(
+    sku_id: int,
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> dict:
     return _engine.get_forecast_adjustment(sku_id, db)
 
 
 @router.get("/forecast-adjustments")
-def get_all_forecast_adjustments(db: Session = Depends(get_db)) -> list[dict]:
-    skus = db.query(SKU).all()
+def get_all_forecast_adjustments(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> list[dict]:
+    skus = _session_skus(session_id, db)
     return [_engine.get_forecast_adjustment(sku.id, db) for sku in skus]

@@ -1,12 +1,12 @@
 import csv
 import io
-from typing import Optional
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_session_id
 from app.services.sop import SOPService
 
 router = APIRouter(prefix="/sop", tags=["sop"])
@@ -14,18 +14,27 @@ _svc = SOPService()
 
 
 @router.get("/consensus")
-def get_consensus_forecast(db: Session = Depends(get_db)) -> list[dict]:
-    return _svc.get_consensus_forecast(db)
+def get_consensus_forecast(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> list[dict]:
+    return _svc.get_consensus_forecast(db, session_id)
 
 
 @router.get("/versions")
-def get_forecast_versions(db: Session = Depends(get_db)) -> list[dict]:
-    return _svc.get_forecast_versions(db)
+def get_forecast_versions(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> list[dict]:
+    return _svc.get_forecast_versions(db, session_id)
 
 
 @router.get("/accuracy")
-def get_accuracy_scorecard(db: Session = Depends(get_db)) -> dict:
-    return _svc.get_accuracy_scorecard(db)
+def get_accuracy_scorecard(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> dict:
+    return _svc.get_accuracy_scorecard(db, session_id)
 
 
 @router.get("/calendar")
@@ -34,8 +43,11 @@ def get_sop_calendar() -> list[dict]:
 
 
 @router.get("/export")
-def export_sap_format(db: Session = Depends(get_db)) -> StreamingResponse:
-    rows = _svc.export_sap_format(db)
+def export_sap_format(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> StreamingResponse:
+    rows = _svc.export_sap_format(db, session_id)
 
     output = io.StringIO()
     if rows:

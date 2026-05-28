@@ -7,11 +7,15 @@ const api: AxiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+const getSessionId = () => localStorage.getItem('pulsechain_session_id') || 'demo'
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
+  const sessionId = getSessionId()
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  config.headers['X-Session-ID'] = sessionId
   return config
 })
 

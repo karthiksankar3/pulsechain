@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.security import verify_token
+from app.core.security import get_session_id, verify_token
 from app.ml.forecasting import ForecastingEngine
 from app.models.forecast import Forecast
 from app.models.sales import SalesRecord
@@ -43,19 +43,42 @@ def _optional_user(
     return db.query(User).filter(User.id == int(subject)).first()
 
 
-def _required_user(
-    token: Optional[str] = Depends(_oauth2),
+def _session_skus(session_id: str, db: Session) -> list[SKU]:
+    skus = db.query(SKU).filter(SKU.session_id == session_id).order_by(SKU.code).all()
+    if not skus and session_id != "demo":
+        skus = db.query(SKU).filter(SKU.session_id == "demo").order_by(SKU.code).all()
+    return skus
+
+
+def _resolve_sku(sku_id: int, session_id: str, db: Session) -> SKU:
+    sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == session_id).first()
+    if sku is None and session_id != "demo":
+        sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == "demo").first()
+    if sku is None:
+        raise HTTPException(status_code=404, detail=f"SKU {sku_id} not found")
+    return sku
+
+
+# ------------------------------------------------------------------ #
+# GET /forecasting/skus                                                #
+# ------------------------------------------------------------------ #
+
+@router.get("/skus", response_model=list[SKUResponse])
+def list_skus(
     db: Session = Depends(get_db),
-) -> User:
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    subject = verify_token(token)
-    if subject is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    user = db.query(User).filter(User.id == int(subject)).first()
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return user
+    session_id: str = Depends(get_session_id),
+    _: Optional[User] = Depends(_optional_user),
+) -> list[SKUResponse]:
+    skus = _session_skus(session_id, db)
+    return [
+        SKUResponse(
+            id=s.id,
+            name=s.name,
+            atc_code=s.code,
+            therapy_area=s.therapeutic_area,
+        )
+        for s in skus
+    ]
 
 
 # ------------------------------------------------------------------ #
@@ -66,11 +89,12 @@ def _required_user(
 def run_forecast(
     payload: ForecastRequest,
     db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
     _current_user: Optional[User] = Depends(_optional_user),
 ) -> ForecastResponse:
-    sku = db.query(SKU).filter(SKU.id == payload.sku_id).first()
-    if sku is None:
-        raise HTTPException(status_code=404, detail=f"SKU {payload.sku_id} not found")
+    sku = _resolve_sku(payload.sku_id, session_id, db)
+    # Use the SKU's actual session for storing the forecast
+    eff_session = sku.session_id
 
     model_name = payload.model_name.lower()
     if model_name not in ("prophet", "arima", "xgboost", "ensemble"):
@@ -90,7 +114,6 @@ def run_forecast(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-    # Persist forecast points
     now = datetime.now(timezone.utc)
     new_rows = [
         Forecast(
@@ -103,6 +126,7 @@ def run_forecast(
             upper_bound=ub,
             confidence_level=payload.confidence_level,
             mape=result.mape,
+            session_id=eff_session,
         )
         for d, f, lb, ub in zip(
             result.dates, result.forecast, result.lower_bound, result.upper_bound
@@ -135,27 +159,6 @@ def run_forecast(
 
 
 # ------------------------------------------------------------------ #
-# GET /forecasting/skus                                                #
-# ------------------------------------------------------------------ #
-
-@router.get("/skus", response_model=list[SKUResponse])
-def list_skus(
-    db: Session = Depends(get_db),
-    _: Optional[User] = Depends(_optional_user),
-) -> list[SKUResponse]:
-    skus = db.query(SKU).order_by(SKU.code).all()
-    return [
-        SKUResponse(
-            id=s.id,
-            name=s.name,
-            atc_code=s.code,
-            therapy_area=s.therapeutic_area,
-        )
-        for s in skus
-    ]
-
-
-# ------------------------------------------------------------------ #
 # GET /forecasting/skus/{sku_id}/latest                                #
 # ------------------------------------------------------------------ #
 
@@ -165,13 +168,11 @@ def get_latest_forecast(
     model_name: str = Query(default="ensemble"),
     horizon_days: int = Query(default=90),
     db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
     _: Optional[User] = Depends(_optional_user),
 ) -> SKUChartData:
-    sku = db.query(SKU).filter(SKU.id == sku_id).first()
-    if sku is None:
-        raise HTTPException(status_code=404, detail=f"SKU {sku_id} not found")
+    sku = _resolve_sku(sku_id, session_id, db)
 
-    # Historical actuals — last 2 years
     cutoff = datetime.now(timezone.utc).date() - timedelta(days=730)
     rows = (
         db.query(SalesRecord.sale_date, SalesRecord.quantity)
@@ -184,7 +185,6 @@ def get_latest_forecast(
         for r in rows
     ]
 
-    # Run forecast on demand
     try:
         model_key = model_name.lower()
         if model_key == "ensemble":
@@ -229,11 +229,10 @@ def get_latest_forecast(
 def get_sku_accuracy(
     sku_id: int,
     db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
     _: Optional[User] = Depends(_optional_user),
 ) -> SKUAccuracy:
-    sku = db.query(SKU).filter(SKU.id == sku_id).first()
-    if sku is None:
-        raise HTTPException(status_code=404, detail=f"SKU {sku_id} not found")
+    _resolve_sku(sku_id, session_id, db)
 
     models_list = ["arima", "xgboost", "prophet", "ensemble"]
     accuracy_rows: list[ModelAccuracy] = []
@@ -252,7 +251,7 @@ def get_sku_accuracy(
                     sample_size=metrics["sample_size"],
                 )
             )
-        except Exception as exc:
+        except Exception:
             accuracy_rows.append(
                 ModelAccuracy(
                     model_name=mname,
@@ -271,13 +270,13 @@ def get_sku_accuracy(
 @router.get("/portfolio", response_model=list[PortfolioItem])
 def get_portfolio(
     db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
     _: Optional[User] = Depends(_optional_user),
 ) -> list[PortfolioItem]:
-    skus = db.query(SKU).order_by(SKU.code).all()
+    skus = _session_skus(session_id, db)
     items: list[PortfolioItem] = []
 
     for sku in skus:
-        # 28-day naive forecast (rolling mean of last 28 days)
         recent = (
             db.query(SalesRecord.quantity)
             .filter(SalesRecord.sku_id == sku.id)
@@ -304,10 +303,14 @@ def get_portfolio(
             forecast_28 = round(float(sum(vals)), 2) if vals else None
             trend = "stable"
 
-        # Try to get MAPE from stored forecasts
+        eff_session = sku.session_id
         stored = (
             db.query(Forecast.mape)
-            .filter(Forecast.sku_id == sku.id, Forecast.mape.isnot(None))
+            .filter(
+                Forecast.sku_id == sku.id,
+                Forecast.mape.isnot(None),
+                Forecast.session_id == eff_session,
+            )
             .order_by(Forecast.created_at.desc())
             .first()
         )

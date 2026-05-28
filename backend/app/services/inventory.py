@@ -85,6 +85,14 @@ def _latest_snapshot(sku_id: int, db: Session) -> InventorySnapshot | None:
     )
 
 
+def _get_session_skus(session_id: str, db: Session) -> list[SKU]:
+    """Return SKUs for session; fall back to demo if session has none."""
+    skus = db.query(SKU).filter(SKU.session_id == session_id).all()
+    if not skus and session_id != "demo":
+        skus = db.query(SKU).filter(SKU.session_id == "demo").all()
+    return skus
+
+
 def calculate_dos(sku_id: int, db: Session) -> float:
     records = (
         db.query(SalesRecord)
@@ -124,7 +132,6 @@ def calculate_expiry_risk(sku_id: int, db: Session) -> dict:
     snapshot = _latest_snapshot(sku_id, db)
     current_stock = snapshot.quantity_on_hand if snapshot else 0.0
 
-    # Synthetic expiry: shelf life varies deterministically by sku_id (15–64 days from snapshot)
     shelf_days = (sku_id % 8) * 7 + 15
     if snapshot:
         expiry_date = snapshot.snapshot_at.date() + timedelta(days=shelf_days)
@@ -170,8 +177,8 @@ def calculate_stockout_probability(sku_id: int, horizon_days: int, db: Session) 
     return round(float(stockouts.mean()), 4)
 
 
-def run_abc_xyz_analysis(db: Session) -> list[dict]:
-    skus = db.query(SKU).all()
+def run_abc_xyz_analysis(db: Session, session_id: str = "demo") -> list[dict]:
+    skus = _get_session_skus(session_id, db)
 
     sku_revenue: dict[int, float] = {}
     sku_cv: dict[int, float] = {}
@@ -238,8 +245,8 @@ def run_abc_xyz_analysis(db: Session) -> list[dict]:
     return results
 
 
-def get_portfolio_health(db: Session) -> dict:
-    skus = db.query(SKU).all()
+def get_portfolio_health(db: Session, session_id: str = "demo") -> dict:
+    skus = _get_session_skus(session_id, db)
 
     stockout_risk_count = 0
     expiry_risk_count = 0

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+from fastapi import Header
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -38,3 +39,10 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Return True if the plaintext password matches the stored hash."""
     return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_session_id(x_session_id: str = Header(default="demo")) -> str:
+    """Extract and validate X-Session-ID header; fall back to 'demo'."""
+    if not x_session_id or x_session_id.strip() == "demo":
+        return "demo"
+    return x_session_id.strip()

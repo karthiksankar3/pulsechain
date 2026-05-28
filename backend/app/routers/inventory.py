@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.security import get_session_id
 from app.models.inventory import InventorySnapshot
 from app.models.sku import SKU
 from app.services.inventory import (
@@ -18,15 +19,37 @@ from app.services.inventory import (
 router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 
+def _session_skus(session_id: str, db: Session) -> list[SKU]:
+    skus = db.query(SKU).filter(SKU.session_id == session_id).all()
+    if not skus and session_id != "demo":
+        skus = db.query(SKU).filter(SKU.session_id == "demo").all()
+    return skus
+
+
+def _resolve_sku(sku_id: int, session_id: str, db: Session) -> SKU:
+    sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == session_id).first()
+    if sku is None and session_id != "demo":
+        sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == "demo").first()
+    if sku is None:
+        raise HTTPException(status_code=404, detail="SKU not found")
+    return sku
+
+
 @router.get("/health")
-def get_health(db: Session = Depends(get_db)) -> dict:
-    return get_portfolio_health(db)
+def get_health(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> dict:
+    return get_portfolio_health(db, session_id)
 
 
 @router.get("/skus")
-def list_skus(db: Session = Depends(get_db)) -> list[dict]:
-    skus = db.query(SKU).all()
-    abc_xyz_map = {item["sku_id"]: item for item in run_abc_xyz_analysis(db)}
+def list_skus(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> list[dict]:
+    skus = _session_skus(session_id, db)
+    abc_xyz_map = {item["sku_id"]: item for item in run_abc_xyz_analysis(db, session_id)}
 
     results: list[dict] = []
     for sku in skus:
@@ -71,10 +94,12 @@ def list_skus(db: Session = Depends(get_db)) -> list[dict]:
 
 
 @router.get("/skus/{sku_id}")
-def get_sku_detail(sku_id: int, db: Session = Depends(get_db)) -> dict:
-    sku = db.query(SKU).filter(SKU.id == sku_id).first()
-    if not sku:
-        raise HTTPException(status_code=404, detail="SKU not found")
+def get_sku_detail(
+    sku_id: int,
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> dict:
+    sku = _resolve_sku(sku_id, session_id, db)
 
     dos = calculate_dos(sku_id, db)
     ss_90 = calculate_safety_stock(sku_id, 0.90, db)
@@ -85,7 +110,7 @@ def get_sku_detail(sku_id: int, db: Session = Depends(get_db)) -> dict:
     sp90 = calculate_stockout_probability(sku_id, 90, db)
     expiry = calculate_expiry_risk(sku_id, db)
 
-    abc_xyz_all = run_abc_xyz_analysis(db)
+    abc_xyz_all = run_abc_xyz_analysis(db, session_id)
     az = next((x for x in abc_xyz_all if x["sku_id"] == sku_id), {})
 
     snapshot = _latest_snapshot(sku_id, db)
@@ -114,8 +139,11 @@ def get_sku_detail(sku_id: int, db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/abc-xyz")
-def get_abc_xyz(db: Session = Depends(get_db)) -> list[dict]:
-    return run_abc_xyz_analysis(db)
+def get_abc_xyz(
+    db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
+) -> list[dict]:
+    return run_abc_xyz_analysis(db, session_id)
 
 
 @router.get("/safety-stock/{sku_id}")
@@ -123,10 +151,9 @@ def get_safety_stock(
     sku_id: int,
     service_level: float = Query(default=0.95, ge=0.80, le=0.99),
     db: Session = Depends(get_db),
+    session_id: str = Depends(get_session_id),
 ) -> dict:
-    sku = db.query(SKU).filter(SKU.id == sku_id).first()
-    if not sku:
-        raise HTTPException(status_code=404, detail="SKU not found")
+    sku = _resolve_sku(sku_id, session_id, db)
 
     result = calculate_safety_stock(sku_id, service_level, db)
     result["sku_name"] = sku.name

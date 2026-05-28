@@ -37,12 +37,12 @@ def load_pharma_sales_atc(db: Session) -> dict:
     melted["quantity"] = pd.to_numeric(melted["quantity"], errors="coerce").fillna(0.0)
     melted = melted[melted["quantity"] >= 0]
 
-    # Upsert SKU records
+    # Upsert demo SKU records (tagged session_id="demo")
     skus_created = 0
     sku_map: dict[str, int] = {}
     for code in atc_cols:
         meta = ATC_META[code]
-        existing = db.query(SKU).filter(SKU.code == code).first()
+        existing = db.query(SKU).filter(SKU.code == code, SKU.session_id == "demo").first()
         if existing is None:
             sku = SKU(
                 code=code,
@@ -50,6 +50,7 @@ def load_pharma_sales_atc(db: Session) -> dict:
                 therapeutic_area=meta["therapy_area"],
                 category="ATC",
                 unit_of_measure="units",
+                session_id="demo",
             )
             db.add(sku)
             db.flush()
@@ -58,7 +59,7 @@ def load_pharma_sales_atc(db: Session) -> dict:
         else:
             sku_map[code] = existing.id
 
-    # Bulk insert sales records in batches
+    # Bulk insert sales records tagged session_id="demo"
     batch: list[SalesRecord] = []
     for row in melted.itertuples(index=False):
         code: str = row.atc_code  # type: ignore[assignment]
@@ -69,6 +70,7 @@ def load_pharma_sales_atc(db: Session) -> dict:
                 sku_id=sku_map[code],
                 sale_date=row.datum.date(),
                 quantity=float(row.quantity),
+                session_id="demo",
             )
         )
         if len(batch) >= 2000:
@@ -99,8 +101,7 @@ def load_supply_chain_inventory(db: Session) -> int:
 
     sc_df = pd.read_csv(csv_path)
 
-    # Map unique regions to warehouse codes and generate synthetic snapshots
-    skus = db.query(SKU).all()
+    skus = db.query(SKU).filter(SKU.session_id == "demo").all()
     if not skus:
         return 0
 
@@ -109,7 +110,6 @@ def load_supply_chain_inventory(db: Session) -> int:
 
     snapshots: list[InventorySnapshot] = []
     for idx, sku in enumerate(skus):
-        # Pull average daily sales for this SKU to derive stock levels
         records = (
             db.query(SalesRecord)
             .filter(SalesRecord.sku_id == sku.id)
@@ -137,6 +137,7 @@ def load_supply_chain_inventory(db: Session) -> int:
                 quantity_in_transit=qit,
                 days_of_supply=dos,
                 status="normal" if dos >= 14 else ("low" if dos >= 7 else "critical"),
+                session_id="demo",
             )
         )
 
@@ -146,7 +147,7 @@ def load_supply_chain_inventory(db: Session) -> int:
 
 
 def seed_demo_data(db: Session) -> None:
-    sales_count = db.query(SalesRecord).count()
+    sales_count = db.query(SalesRecord).filter(SalesRecord.session_id == "demo").count()
     if sales_count == 0:
         print("🌱 Seeding pharma sales data...")
         result = load_pharma_sales_atc(db)
@@ -158,7 +159,7 @@ def seed_demo_data(db: Session) -> None:
     else:
         print(f"📊 Sales records already present ({sales_count:,} rows) — skipping seed.")
 
-    inv_count = db.query(InventorySnapshot).count()
+    inv_count = db.query(InventorySnapshot).filter(InventorySnapshot.session_id == "demo").count()
     if inv_count == 0:
         print("🏭 Seeding inventory snapshots...")
         n = load_supply_chain_inventory(db)

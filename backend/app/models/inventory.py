@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, String, func
+from sqlalchemy import DateTime, Float, ForeignKey, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -18,6 +18,7 @@ class InventorySnapshot(Base):
     quantity_in_transit: Mapped[float] = mapped_column(Float, default=0.0)
     days_of_supply: Mapped[float | None] = mapped_column(Float)
     status: Mapped[str] = mapped_column(String(50), default="normal")
+    session_id: Mapped[str] = mapped_column(String(50), index=True, default="demo", server_default=text("'demo'"))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     sku = relationship("SKU", backref="inventory_snapshots")

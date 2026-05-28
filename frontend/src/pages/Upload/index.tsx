@@ -62,6 +62,10 @@ function DatasetBanner() {
           </p>
           <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>
             {info.sku_count} SKUs · {info.record_count.toLocaleString()} records · {info.date_range_start} to {info.date_range_end}
+            {' · '}
+            <span style={{ fontFamily: 'monospace', color: '#cbd5e1' }}>
+              Session: {(localStorage.getItem('pulsechain_session_id') || 'demo').slice(0, 12)}…
+            </span>
           </p>
         </div>
       </div>

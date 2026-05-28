@@ -3,6 +3,14 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Sidebar from './components/Layout/Sidebar'
 import api from './services/api'
 
+// Generate a persistent session ID for this browser on first load
+if (!localStorage.getItem('pulsechain_session_id')) {
+  localStorage.setItem(
+    'pulsechain_session_id',
+    'sess_' + Math.random().toString(36).substr(2, 9),
+  )
+}
+
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const ForecastEngine = lazy(() => import('./pages/ForecastEngine'))
 const InventoryIntelligence = lazy(() => import('./pages/InventoryIntelligence'))

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, Integer, String, func
+from sqlalchemy import DateTime, Float, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -19,6 +19,7 @@ class SKU(Base):
     unit_price: Mapped[float | None] = mapped_column(Float)
     lead_time_days: Mapped[int] = mapped_column(Integer, default=30)
     reorder_point: Mapped[float | None] = mapped_column(Float)
+    session_id: Mapped[str] = mapped_column(String(50), index=True, default="demo", server_default=text("'demo'"))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()

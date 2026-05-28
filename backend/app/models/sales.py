@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String, func
+from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -17,6 +17,7 @@ class SalesRecord(Base):
     quantity: Mapped[float] = mapped_column(Float, nullable=False)
     revenue: Mapped[float | None] = mapped_column(Float)
     units_returned: Mapped[float] = mapped_column(Float, default=0.0)
+    session_id: Mapped[str] = mapped_column(String(50), index=True, default="demo", server_default=text("'demo'"))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     sku = relationship("SKU", backref="sales_records")
