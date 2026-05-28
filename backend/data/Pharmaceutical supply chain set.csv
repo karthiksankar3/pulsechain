@@ -1,0 +1,50 @@
+ID,Stage,Activity,Description,Cost (GHS),Revenue (GHS),Time (Days),Region
+1,Research & Development,Drug Discovery,Researching potential compounds locally,"1,200,000",0,365,Greater Accra
+2,Research & Development,Clinical Trials,Conducting trials with local participants,"4,500,000",0,730,Ashanti Region
+3,Research & Development,Preclinical Studies,Laboratory studies before human trials,"800,000",0,180,Greater Accra
+4,Research & Development,Regulatory Approval,Submitting for drug approval from authorities,"300,000",0,180,National
+5,Research & Development,Clinical Trial Design,Designing the structure of clinical trials,"500,000",0,90,Greater Accra
+6,Manufacturing,Production,Manufacturing medicines locally,"1,800,000",0,180,Greater Accra
+7,Manufacturing,Quality Control,Testing products for compliance,"400,000",0,60,Greater Accra
+8,Manufacturing,Packaging,Packaging of finished products,"250,000",0,30,Greater Accra
+9,Manufacturing,API Sourcing,Sourcing Active Pharmaceutical Ingredients,"600,000",0,60,International
+10,Manufacturing,Training,Training staff on production techniques,"100,000",0,30,Greater Accra
+11,Distribution,Logistics,Transporting products across the country,"250,000",0,30,National
+12,Distribution,Warehousing,Storing products before distribution,"150,000",0,0,Greater Accra
+13,Distribution,Cold Chain Management,Managing temperature-sensitive products,"200,000",0,30,National
+14,Distribution,Inventory Management,Managing stock levels in warehouses,"100,000",0,Ongoing,Greater Accra
+15,Sales,Wholesale,Selling to pharmacies and hospitals,0,"8,000,000",0,National
+16,Sales,Retail,Direct sales to consumers in pharmacies,0,"15,000,000",0,National
+17,Sales,Online Sales,E-commerce platform for drug sales,0,"5,000,000",0,National
+18,Sales,Exporting,Selling products to neighboring countries,0,"4,000,000",0,West Africa
+19,Sales,Direct Sales,Direct sales to clinics and health facilities,0,"3,000,000",0,National
+20,Post-Market,Pharmacovigilance,Monitoring drug safety post-launch,"150,000",0,Ongoing,National
+21,Post-Market,Adverse Event Reporting,Collecting and reporting adverse events,"50,000",0,Ongoing,National
+22,Post-Market,Market Research,Understanding consumer preferences,"100,000",0,90,National
+23,Post-Market,Product Recall Management,Managing product recalls if necessary,"75,000",0,60,National
+24,Research & Development,Collaboration with Universities,Partnering for research initiatives,"200,000",0,180,Greater Accra
+25,Research & Development,Ethical Approval,Obtaining ethical approval for trials,"100,000",0,30,Greater Accra
+26,Manufacturing,Maintenance,Regular maintenance of manufacturing equipment,"80,000",0,30,Greater Accra
+27,Manufacturing,Waste Management,Proper disposal of pharmaceutical waste,"120,000",0,Ongoing,Greater Accra
+28,Distribution,Compliance Audits,Ensuring compliance with regulations,"70,000",0,30,National
+29,Sales,Trade Marketing,Promotional activities to support sales,"200,000",0,60,National
+30,Sales,Customer Relationship Management,Managing relationships with healthcare providers,"150,000",0,Ongoing,National
+31,Post-Market,Continuous Improvement,Ongoing evaluation of processes and outcomes,"100,000",0,Ongoing,National
+32,Research & Development,Market Entry Strategy,Developing strategies for entering new markets,"150,000",0,90,Greater Accra
+33,Manufacturing,Product Development,Developing new formulations,"500,000",0,180,Greater Accra
+34,Manufacturing,Labeling,Ensuring proper labeling of products,"50,000",0,30,Greater Accra
+35,Distribution,Freight Forwarding,Managing international shipments,"300,000",0,30,National
+36,Sales,Key Account Management,Managing major customer accounts,"200,000",0,Ongoing,National
+37,Post-Market,Risk Management,Identifying and mitigating risks,"80,000",0,Ongoing,National
+38,Research & Development,Networking with Stakeholders,Engaging with industry stakeholders,"50,000",0,Ongoing,Greater Accra
+39,Manufacturing,Production Planning,Planning production schedules,"100,000",0,30,Greater Accra
+40,Distribution,Contract Management,Managing contracts with distributors,"60,000",0,30,National
+41,Sales,Product Training,Training staff on product features,"75,000",0,30,National
+42,Sales,Sales Forecasting,Analyzing sales data for future predictions,"50,000",0,30,National
+43,Post-Market,Stakeholder Feedback,Collecting feedback from healthcare providers,"40,000",0,60,National
+44,Research & Development,Innovation Workshops,Conducting workshops for new ideas,"100,000",0,30,Greater Accra
+45,Manufacturing,Supply Chain Management,Managing the supply chain for efficiency,"120,000",0,60,Greater Accra
+46,Distribution,Distribution Strategy,Developing strategies for efficient distribution,"80,000",0,30,National
+47,Sales,Pricing Strategy,Setting competitive prices for products,"70,000",0,30,National
+48,Post-Market,Community Engagement,Engaging with the community on health issues,"60,000",0,Ongoing,National
+49,Research & Development,Technology Transfer,Transferring technology from labs to production,"150,000",0,90,Greater Accra

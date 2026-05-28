@@ -2,46 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: #0A1628;
+  font-family: 'DM Sans', sans-serif;
+  color: white;
+}
+
 :root {
   --color-navy: #0A1628;
   --color-teal: #00D4B4;
   --color-orange: #FF6B35;
-
-  --color-bg-primary: var(--color-navy);
-  --color-accent-primary: var(--color-teal);
-  --color-accent-secondary: var(--color-orange);
-
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
-* {
-  box-sizing: border-box;
+.scrollable { overflow-y: auto; overflow-x: hidden; }
+.scrollable::-webkit-scrollbar { width: 4px; }
+.scrollable::-webkit-scrollbar-track { background: transparent; }
+.scrollable::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+  display: inline-flex;
+  width: max-content;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: var(--color-navy);
-  color: #f0f4f8;
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-@layer utilities {
-  .text-teal {
-    color: var(--color-teal);
-  }
-  .text-orange {
-    color: var(--color-orange);
-  }
-  .bg-navy {
-    background-color: var(--color-navy);
-  }
-  .border-teal {
-    border-color: var(--color-teal);
-  }
+@layer components {
+  .card { @apply bg-white/[0.04] border border-white/[0.08] rounded-2xl; }
+  .badge-critical { @apply bg-red-500/20 text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide; }
+  .badge-warning { @apply bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide; }
+  .badge-healthy { @apply bg-teal-500/20 text-[#00D4B4] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide; }
+  .btn-primary { @apply bg-[#00D4B4] text-[#0A1628] font-semibold px-4 py-2 rounded-xl hover:bg-[#00D4B4]/90 transition-colors text-sm; }
+  .section-title { @apply text-sm font-semibold text-white mb-4; }
 }

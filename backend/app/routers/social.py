@@ -1,42 +1,61 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.routers.auth import get_current_user
-from app.models.user import User
-from app.schemas.social import DemandSignalIndexRead, DemandSignalRead
+from app.models.sku import SKU
+from app.social.demand_signal_index import DemandSignalEngine
+from app.social.google_trends import GoogleTrendsService
+from app.social.news_signals import NewsAPIService
+from app.social.reddit_signals import RedditService
 
 router = APIRouter(prefix="/social", tags=["social"])
 
+DRUG_TERMS = [
+    "paracetamol", "ibuprofen", "diclofenac", "aspirin", "diazepam",
+    "fever", "pain relief", "anti-inflammatory", "respiratory drugs", "anxiety medication",
+]
 
-@router.get("/signals", response_model=list[DemandSignalRead])
-def list_signals(
-    sku_id: int | None = Query(None),
-    source: str | None = Query(None),
-    limit: int = Query(100, le=500),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> list[DemandSignalRead]:
-    """Return paginated demand signals, optionally filtered by SKU or source."""
-    ...
+_engine = DemandSignalEngine()
+_trends = GoogleTrendsService()
+_news = NewsAPIService()
+_reddit = RedditService()
 
 
-@router.get("/index/{sku_id}", response_model=list[DemandSignalIndexRead])
-def get_signal_index(
-    sku_id: int,
-    days: int = Query(30, le=365),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> list[DemandSignalIndexRead]:
-    """Return the composite demand signal index time series for a SKU."""
-    ...
+@router.get("/trends")
+def get_trends() -> dict:
+    return _trends.fetch_weekly_trends(DRUG_TERMS, geo="IN")
 
 
-@router.post("/refresh/{sku_id}")
-def refresh_signals(
-    sku_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> dict:
-    """Trigger a fresh pull of external signals for the given SKU."""
-    ...
+@router.get("/signals")
+def get_signals() -> list[dict]:
+    return _engine.get_all_signals()
+
+
+@router.get("/ticker")
+def get_ticker() -> list[dict]:
+    return _engine.get_ticker_items()
+
+
+@router.get("/news")
+def get_news() -> dict:
+    return _news.get_signal_summary()
+
+
+@router.get("/reddit")
+def get_reddit() -> dict:
+    drug_terms = ["paracetamol", "ibuprofen", "diclofenac", "fever", "respiratory drugs"]
+    return {
+        "outbreak_signals": _reddit.get_outbreak_signals(),
+        "drug_sentiments": [_reddit.analyze_drug_sentiment(d) for d in drug_terms[:4]],
+    }
+
+
+@router.get("/forecast-adjustment/{sku_id}")
+def get_forecast_adjustment(sku_id: int, db: Session = Depends(get_db)) -> dict:
+    return _engine.get_forecast_adjustment(sku_id, db)
+
+
+@router.get("/forecast-adjustments")
+def get_all_forecast_adjustments(db: Session = Depends(get_db)) -> list[dict]:
+    skus = db.query(SKU).all()
+    return [_engine.get_forecast_adjustment(sku.id, db) for sku in skus]

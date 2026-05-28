@@ -38,3 +38,32 @@ export const useUIStore = create<UIState>()((set) => ({
   sidebarOpen: true,
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 }))
+
+// ------------------------------------------------------------------ //
+// Forecast store                                                       //
+// ------------------------------------------------------------------ //
+
+export interface SKU {
+  id: number
+  name: string
+  atc_code: string
+  therapy_area: string | null
+}
+
+interface ForecastState {
+  selectedSkuId: number | null
+  selectedModel: 'prophet' | 'arima' | 'xgboost' | 'ensemble'
+  timeRange: '3M' | '6M' | '1Y' | '2Y'
+  setSelectedSkuId: (id: number | null) => void
+  setSelectedModel: (model: ForecastState['selectedModel']) => void
+  setTimeRange: (range: ForecastState['timeRange']) => void
+}
+
+export const useForecastStore = create<ForecastState>()((set) => ({
+  selectedSkuId: null,
+  selectedModel: 'ensemble',
+  timeRange: '1Y',
+  setSelectedSkuId: (id) => set({ selectedSkuId: id }),
+  setSelectedModel: (model) => set({ selectedModel: model }),
+  setTimeRange: (range) => set({ timeRange: range }),
+}))

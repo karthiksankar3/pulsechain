@@ -1,48 +1,57 @@
 import { NavLink } from 'react-router-dom'
 
-interface NavItem {
-  label: string
-  path: string
-  icon?: string
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Forecast Engine', path: '/forecast' },
-  { label: 'Inventory Intelligence', path: '/inventory' },
-  { label: 'PharmaPulse', path: '/pharma-pulse' },
-  { label: 'Scenario Planning', path: '/scenarios' },
-  { label: 'SOP Console', path: '/sop' },
+const NAV_ITEMS = [
+  { label: 'Dashboard',       path: '/dashboard',    icon: '🏠' },
+  { label: 'Forecast Engine', path: '/forecast',     icon: '📈' },
+  { label: 'Inventory',       path: '/inventory',    icon: '📦' },
+  { label: 'PharmaPulse',     path: '/pharma-pulse', icon: '🔥' },
+  { label: 'Scenarios',       path: '/scenarios',    icon: '🔀' },
+  { label: 'S&OP Console',    path: '/sop',          icon: '📋' },
+  { label: 'Upload Data',     path: '/upload',       icon: '⬆️' },
 ]
 
 export default function Sidebar() {
   return (
-    <aside
-      className="flex h-full w-60 flex-col bg-navy-900 px-4 py-6"
-      style={{ backgroundColor: 'var(--color-navy)' }}
-    >
-      <div className="mb-8">
-        <span className="text-xl font-bold" style={{ color: 'var(--color-teal)' }}>
-          PulseChain
-        </span>
+    <>
+      {/* Logo */}
+      <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
+        <div style={{ fontSize: '18px', fontWeight: 700, color: '#00D4B4', letterSpacing: '-0.02em' }}>PulseChain</div>
+        <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>Pharma Demand Planning</div>
       </div>
-      <nav className="flex flex-col gap-1">
+
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) =>
-              `rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-teal-500/20 text-teal-500'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
-              }`
-            }
+            style={({ isActive }) => ({
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '9px 12px',
+              borderRadius: '10px',
+              marginBottom: '2px',
+              fontSize: '13px',
+              fontWeight: isActive ? 600 : 400,
+              color: isActive ? '#00D4B4' : '#94a3b8',
+              backgroundColor: isActive ? 'rgba(0,212,180,0.1)' : 'transparent',
+              borderLeft: isActive ? '2px solid #00D4B4' : '2px solid transparent',
+              textDecoration: 'none',
+              transition: 'all 0.15s',
+            })}
           >
-            {item.label}
+            <span style={{ fontSize: '15px', width: '20px', textAlign: 'center', flexShrink: 0 }}>{item.icon}</span>
+            <span>{item.label}</span>
           </NavLink>
         ))}
       </nav>
-    </aside>
+
+      {/* Footer */}
+      <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
+        <p style={{ fontSize: '11px', color: '#334155' }}>8 SKUs · 16,848 records</p>
+        <p style={{ fontSize: '11px', color: '#1e293b', marginTop: '2px' }}>Data: 2014–2019</p>
+      </div>
+    </>
   )
 }
