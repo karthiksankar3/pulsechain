@@ -45,8 +45,111 @@ function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc:
   )
 }
 
+// ---- Name Gate Modal ------------------------------------------------
+
+function NameGateModal({ onEnter }: { onEnter: (name: string) => void }) {
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = name.trim()
+    if (trimmed.length < 2) {
+      setError('Name must be at least 2 characters')
+      return
+    }
+    localStorage.setItem('pulsechain_user_name', trimmed)
+    onEnter(trimmed)
+  }
+
+  const inputStyle: CSSProperties = {
+    width: '100%', padding: '12px 16px', borderRadius: 12,
+    border: `1px solid ${error ? '#ef4444' : '#e2e8f0'}`,
+    fontSize: 15, color: '#0f172a', outline: 'none',
+    boxSizing: 'border-box', transition: 'border-color 0.15s',
+    backgroundColor: '#fff',
+  }
+
+  return (
+    /* Backdrop */
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      backgroundColor: 'rgba(10,22,40,0.85)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backdropFilter: 'blur(4px)',
+    }}>
+      <div style={{
+        backgroundColor: '#ffffff', borderRadius: 24, padding: 40,
+        maxWidth: 420, width: '100%', margin: '0 24px',
+        boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+      }}>
+        {/* Logo */}
+        <span style={{ fontSize: 22, fontWeight: 700, color: '#00D4B4' }}>⚡ PulseChain</span>
+        <p style={{ fontSize: 13, color: '#94a3b8', marginTop: 4, marginBottom: 0 }}>
+          From Market Signal to Supply Decision
+        </p>
+
+        {/* Divider */}
+        <div style={{ height: 1, backgroundColor: '#e2e8f0', margin: '24px 0' }} />
+
+        {/* Form */}
+        <form onSubmit={handleSubmit}>
+          <p style={{ fontSize: 15, fontWeight: 600, color: '#334155', marginBottom: 12, marginTop: 0 }}>
+            Welcome! What's your name?
+          </p>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => { setName(e.target.value); setError('') }}
+            placeholder="Enter your name e.g. Karthik"
+            autoFocus
+            style={inputStyle}
+            onFocus={(e) => { if (!error) e.currentTarget.style.borderColor = '#00D4B4' }}
+            onBlur={(e) => { if (!error) e.currentTarget.style.borderColor = '#e2e8f0' }}
+          />
+          {error && (
+            <p style={{ fontSize: 12, color: '#ef4444', marginTop: 6, marginBottom: 0 }}>{error}</p>
+          )}
+          <button
+            type="submit"
+            style={{
+              width: '100%', marginTop: 16, padding: '13px',
+              backgroundColor: '#00D4B4', color: '#0A1628',
+              fontWeight: 700, fontSize: 15, borderRadius: 12, border: 'none',
+              cursor: 'pointer', transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.88' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
+          >
+            Enter PulseChain →
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ---- Landing Page ---------------------------------------------------
+
 export default function Landing() {
   const navigate = useNavigate()
+  const [showGate, setShowGate] = useState(false)
+  const [pendingPath, setPendingPath] = useState('/dashboard')
+
+  function goTo(path: string) {
+    const stored = localStorage.getItem('pulsechain_user_name')
+    if (stored && stored.trim().length >= 2) {
+      navigate(path)
+    } else {
+      setPendingPath(path)
+      setShowGate(true)
+    }
+  }
+
+  function handleNameEntered() {
+    setShowGate(false)
+    navigate(pendingPath)
+  }
 
   const navBtnOutline: CSSProperties = {
     padding: '8px 20px', borderRadius: 12, border: '1px solid #e2e8f0',
@@ -63,6 +166,9 @@ export default function Landing() {
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', overflowX: 'hidden', fontFamily: "'DM Sans', 'Sora', sans-serif" }}>
 
+      {/* Name gate modal */}
+      {showGate && <NameGateModal onEnter={handleNameEntered} />}
+
       {/* Navbar */}
       <header style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
@@ -77,8 +183,8 @@ export default function Landing() {
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => navigate('/dashboard')} style={navBtnOutline}>Log in</button>
-          <button onClick={() => navigate('/dashboard')} style={navBtnFill}>Get Started</button>
+          <button onClick={() => goTo('/dashboard')} style={navBtnOutline}>Log in</button>
+          <button onClick={() => goTo('/dashboard')} style={navBtnFill}>Get Started</button>
         </div>
       </header>
 
@@ -111,7 +217,7 @@ export default function Landing() {
           {/* CTA buttons */}
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 40, flexWrap: 'wrap' }}>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => goTo('/dashboard')}
               style={{ backgroundColor: '#00D4B4', color: '#0A1628', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,212,180,0.25)', transition: 'all 0.15s' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.9' }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
@@ -119,7 +225,7 @@ export default function Landing() {
               Get Started — Free
             </button>
             <button
-              onClick={() => navigate('/forecast')}
+              onClick={() => goTo('/forecast')}
               style={{ backgroundColor: '#fff', color: '#0f172a', fontWeight: 600, fontSize: 16, padding: '16px 32px', borderRadius: 16, border: '2px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.15s' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#00D4B4' }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#e2e8f0' }}
@@ -205,7 +311,7 @@ export default function Landing() {
             Start with 8 pre-loaded pharma SKUs or upload your own data.
           </p>
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => goTo('/dashboard')}
             style={{ backgroundColor: '#00D4B4', color: '#0A1628', fontWeight: 700, fontSize: 16, padding: '16px 40px', borderRadius: 16, border: 'none', cursor: 'pointer', transition: 'all 0.15s' }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.9' }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}

@@ -117,6 +117,7 @@ function AppShell({ title, children }: { title: string; children: ReactNode }) {
   }
 
   if (!userName) {
+    // Fallback for direct URL access bypassing the landing page
     return <NameGate onEnter={setUserName} />
   }
 
