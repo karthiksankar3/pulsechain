@@ -53,7 +53,7 @@ export interface SKU {
 interface ForecastState {
   selectedSkuId: number | null
   selectedModel: 'prophet' | 'arima' | 'xgboost' | 'ensemble'
-  timeRange: '3M' | '6M' | '1Y' | '2Y'
+  timeRange: '1M' | '2M' | '3M' | '6M' | '1Y' | '2Y'
   setSelectedSkuId: (id: number | null) => void
   setSelectedModel: (model: ForecastState['selectedModel']) => void
   setTimeRange: (range: ForecastState['timeRange']) => void

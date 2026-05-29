@@ -33,11 +33,29 @@ interface ChartRow {
   band: number | null
 }
 
-type TimeRange = '3M' | '6M' | '1Y' | '2Y'
+type TimeRange = '1M' | '2M' | '3M' | '6M' | '1Y' | '2Y'
 type ModelKey = 'prophet' | 'arima' | 'xgboost' | 'ensemble'
 
-const TIME_RANGE_DAYS: Record<TimeRange, number> = {
-  '3M': 90, '6M': 180, '1Y': 365, '2Y': 730,
+const TIME_RANGE_DAYS: Record<TimeRange, { historicalDays: number; forecastDays: number }> = {
+  '1M': { historicalDays: 30, forecastDays: 30 },
+  '2M': { historicalDays: 60, forecastDays: 30 },
+  '3M': { historicalDays: 90, forecastDays: 90 },
+  '6M': { historicalDays: 180, forecastDays: 90 },
+  '1Y': { historicalDays: 365, forecastDays: 90 },
+  '2Y': { historicalDays: 730, forecastDays: 90 },
+}
+
+function getTimeRanges(availableDays: number): TimeRange[] {
+  return (Object.keys(TIME_RANGE_DAYS) as TimeRange[]).filter(
+    (r) => TIME_RANGE_DAYS[r].historicalDays <= availableDays,
+  )
+}
+
+function getDefaultRange(availableDays: number): TimeRange {
+  const ranges = getTimeRanges(availableDays)
+  if (ranges.length === 0) return '3M'
+  const preferred: TimeRange[] = ['1Y', '6M', '3M', '2M', '1M', '2Y']
+  return preferred.find((r) => ranges.includes(r)) ?? ranges[ranges.length - 1]
 }
 
 const MODELS: { key: ModelKey; label: string }[] = [
@@ -68,15 +86,14 @@ function fmtDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
 }
 
-function buildChartData(data: SKUChartData, rangedays: number): ChartRow[] {
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - rangedays)
+function buildChartData(data: SKUChartData, range: TimeRange): ChartRow[] {
+  const { historicalDays, forecastDays } = TIME_RANGE_DAYS[range]
 
   const historical: ChartRow[] = data.historical
-    .filter((h) => new Date(h.date) >= cutoff)
+    .slice(-historicalDays)
     .map((h) => ({ date: h.date, actual: h.actual, forecast: null, lower: null, upper: null, band: null }))
 
-  const forecastRows: ChartRow[] = data.forecast.map((f) => ({
+  const forecastRows: ChartRow[] = data.forecast.slice(0, forecastDays).map((f) => ({
     date: f.date,
     actual: null,
     forecast: f.forecast,
@@ -181,6 +198,8 @@ export default function ForecastEngine() {
   const [running, setRunning] = useState(false)
 
   const abortRef = useRef<AbortController | null>(null)
+  const prevSkuIdRef = useRef<number | null>(null)
+  const resetRangeRef = useRef(false)
 
   useEffect(() => {
     setLoadingSkus(true)
@@ -198,13 +217,23 @@ export default function ForecastEngine() {
 
   useEffect(() => {
     if (!selectedSkuId) return
+    if (prevSkuIdRef.current !== selectedSkuId) {
+      resetRangeRef.current = true
+    }
+    prevSkuIdRef.current = selectedSkuId
     abortRef.current?.abort()
     abortRef.current = new AbortController()
     setLoadingChart(true)
     setChartData(null)
     forecastApi
       .getLatest(selectedSkuId, selectedModel, 90)
-      .then((res) => setChartData(res.data))
+      .then((res) => {
+        setChartData(res.data)
+        if (resetRangeRef.current) {
+          setTimeRange(getDefaultRange(res.data.historical.length))
+          resetRangeRef.current = false
+        }
+      })
       .catch((err) => { if (err.name !== 'CanceledError') console.error(err) })
       .finally(() => setLoadingChart(false))
     setLoadingAccuracy(true)
@@ -228,7 +257,9 @@ export default function ForecastEngine() {
   }
 
   const selectedSku = skus.find((s) => s.id === selectedSkuId) ?? null
-  const rows = chartData ? buildChartData(chartData, TIME_RANGE_DAYS[timeRange]) : []
+  const availableDays = chartData ? chartData.historical.length : 365
+  const availableRanges = getTimeRanges(availableDays)
+  const rows = chartData ? buildChartData(chartData, timeRange) : []
   const current = accuracy?.find((m) => m.model_name === selectedModel) ?? null
   const best = accuracy?.length ? accuracy.reduce((a, b) => (a.mape < b.mape ? a : b), accuracy[0]) : null
 
@@ -300,7 +331,7 @@ export default function ForecastEngine() {
         <div>
           <span style={labelStyle}>Time Range</span>
           <div style={{ display: 'flex', gap: '4px' }}>
-            {(['3M', '6M', '1Y', '2Y'] as TimeRange[]).map((r) => (
+            {availableRanges.map((r) => (
               <button
                 key={r}
                 onClick={() => setTimeRange(r)}
