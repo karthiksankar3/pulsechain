@@ -1,12 +1,9 @@
-import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-import sqlalchemy as _sa
-from alembic import command as alembic_command
-from alembic.config import Config as AlembicConfig
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 
 from app.core.config import get_settings
 from app.core.database import Base, SessionLocal, engine
@@ -15,43 +12,47 @@ from app.routers import auth, forecasting, inventory, scenarios, social, sop, up
 settings = get_settings()
 
 
-def run_migrations() -> None:
-    """Run pending Alembic migrations on startup. Safe to call every time."""
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-    alembic_cfg = AlembicConfig(os.path.join(base_dir, "alembic.ini"))
-    alembic_cfg.set_main_option("script_location", os.path.join(base_dir, "alembic"))
-
-    # If alembic_version table is absent the DB was bootstrapped via create_all
-    # (no prior migrations). Stamp at the initial revision so only pending
-    # migrations (e.g. adding session_id columns) are applied.
-    check_engine = _sa.create_engine(settings.database_url)
-    try:
-        insp = _sa.inspect(check_engine)
-        if not insp.has_table("alembic_version"):
-            alembic_command.stamp(alembic_cfg, "adf3770e5b36")
-    finally:
-        check_engine.dispose()
-
-    alembic_command.upgrade(alembic_cfg, "head")
+def ensure_session_columns() -> None:
+    """Add session_id column to any table that's missing it. Safe on every startup."""
+    tables_to_update = {
+        'skus': 'session_id',
+        'sales_records': 'session_id',
+        'forecasts': 'session_id',
+        'inventory_snapshots': 'session_id',
+    }
+    inspector = inspect(engine)
+    with engine.connect() as conn:
+        for table, column in tables_to_update.items():
+            try:
+                existing_columns = [c['name'] for c in inspector.get_columns(table)]
+                if column not in existing_columns:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} VARCHAR DEFAULT 'demo'"))
+                    conn.execute(text(f"UPDATE {table} SET {column} = 'demo' WHERE {column} IS NULL"))
+                    print(f"✅ Added {column} to {table}")
+                else:
+                    print(f"✓ {column} already exists in {table}")
+            except Exception as e:
+                print(f"⚠️ Could not update {table}: {e}")
+        conn.commit()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    # Create tables if they don't exist (dev convenience — use Alembic in prod)
+    # Create tables if they don't exist
     Base.metadata.create_all(bind=engine)
 
     try:
-        print("🚀 PulseChain startup — running migrations...")
-        run_migrations()
-        print("✅ Migrations complete.")
+        print("🚀 PulseChain startup — ensuring schema...")
+        ensure_session_columns()
+        print("✅ Schema check complete.")
     except Exception as exc:
-        print(f"⚠️  Migration warning (non-fatal): {exc}")
+        print(f"⚠️  Schema check warning (non-fatal): {exc}")
 
     from app.services.data_loader import seed_demo_data
 
     db = SessionLocal()
     try:
-        print("🚀 Seeding demo data...")
+        print("🌱 Seeding demo data...")
         seed_demo_data(db)
         print("✅ Startup complete.")
     except Exception as exc:

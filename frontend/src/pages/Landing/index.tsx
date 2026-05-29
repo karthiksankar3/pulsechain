@@ -58,6 +58,12 @@ function NameGateModal({ onEnter }: { onEnter: (name: string) => void }) {
       setError('Name must be at least 2 characters')
       return
     }
+    if (!localStorage.getItem('pulsechain_session_id')) {
+      localStorage.setItem(
+        'pulsechain_session_id',
+        'sess_' + Date.now() + Math.random().toString(36).substr(2, 5),
+      )
+    }
     localStorage.setItem('pulsechain_user_name', trimmed)
     onEnter(trimmed)
   }
