@@ -2,17 +2,17 @@ import { type CSSProperties, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const FEATURES = [
-  { icon: '🤖', title: 'AI Forecasting', desc: 'Prophet + XGBoost + Ensemble models with inverse-MAPE weighting for pharma-grade accuracy.' },
+  { icon: '🤖', title: 'AI Forecasting', desc: 'Prophet + XGBoost + Ensemble models with inverse-MAPE weighting for enterprise-grade accuracy.' },
   { icon: '📦', title: 'Inventory Intelligence', desc: 'Safety stock optimization, expiry risk detection, and ABC-XYZ segmentation.' },
-  { icon: '🔥', title: 'PharmaPulse Signals', desc: 'Google Trends, Reddit, and news signal aggregation into demand forecasts.' },
+  { icon: '🔥', title: 'MarketPulse Signals', desc: 'Google Trends, Reddit, and news signal aggregation into demand forecasts.' },
   { icon: '🔀', title: 'Scenario Planning', desc: '6 pre-built scenarios: epidemic outbreak, tender win, competitor launch, and more.' },
-  { icon: '📋', title: 'S&OP Console', desc: 'Consensus forecasting, version comparison, and SAP-APO compatible export.' },
+  { icon: '📋', title: 'S&OP Console', desc: 'Consensus forecasting, version comparison, and ERP-compatible export.' },
   { icon: '⬆️', title: 'File Upload', desc: 'Bring your own CSV/XLSX data with guided column mapping wizard.' },
 ]
 
 const STATS = [
   { number: '16,848', label: 'Sales Records' },
-  { number: '8', label: 'ATC Drug SKUs' },
+  { number: '8', label: 'Product SKUs' },
   { number: '6', label: 'Years of Data' },
 ]
 
@@ -198,7 +198,7 @@ export default function Landing() {
         <div style={{ maxWidth: 720 }}>
           {/* Eyebrow */}
           <p style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#00D4B4', marginBottom: 20 }}>
-            Pharma Demand Planning Platform
+            Demand Planning Platform
           </p>
 
           {/* Headline */}
@@ -211,7 +211,7 @@ export default function Landing() {
 
           {/* Subheading */}
           <p style={{ fontSize: 18, color: '#64748b', maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>
-            AI-powered demand forecasting, inventory intelligence, and S&OP automation built specifically for pharmaceutical supply chains.
+            AI-powered demand forecasting, inventory intelligence, and S&OP automation for modern supply chains.
           </p>
 
           {/* CTA buttons */}
@@ -236,7 +236,7 @@ export default function Landing() {
 
           {/* Trust line */}
           <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginTop: 24, flexWrap: 'wrap' }}>
-            {['8 Drug SKUs included', '16,848 sales records', 'No credit card required'].map((t) => (
+            {['8 Product SKUs included', '16,848 sales records', 'No credit card required'].map((t) => (
               <span key={t} style={{ fontSize: 13, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: '#00D4B4', fontWeight: 700 }}>✓</span> {t}
               </span>
@@ -255,7 +255,7 @@ export default function Landing() {
             Six integrated modules
           </h2>
           <p style={{ fontSize: 16, color: '#64748b', textAlign: 'center', marginBottom: 48, marginTop: 0 }}>
-            From AI forecasting to SAP export
+            From AI forecasting to ERP export
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
             {FEATURES.map((f) => (
@@ -269,7 +269,7 @@ export default function Landing() {
       <section style={{ backgroundColor: '#ffffff', padding: '60px 40px' }}>
         <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: 32, fontWeight: 700, color: '#0f172a', margin: 0, marginBottom: 12, letterSpacing: '-0.02em' }}>
-            Powered by real pharma data
+            Powered by real supply chain data
           </h2>
           <p style={{ fontSize: 15, color: '#64748b', marginBottom: 40 }}>
             Pre-loaded with industry datasets — or bring your own
@@ -308,7 +308,7 @@ export default function Landing() {
             Ready to transform your demand planning?
           </h2>
           <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)', margin: 0, marginBottom: 32 }}>
-            Start with 8 pre-loaded pharma SKUs or upload your own data.
+            Start with 8 pre-loaded product SKUs or upload your own data.
           </p>
           <button
             onClick={() => goTo('/dashboard')}

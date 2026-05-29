@@ -254,7 +254,7 @@ export default function ForecastEngine() {
       <div style={{ ...card, padding: '20px', display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '20px', flexWrap: 'wrap' }}>
         {/* Drug selector */}
         <div>
-          <span style={labelStyle}>Drug / SKU</span>
+          <span style={labelStyle}>Product / SKU</span>
           <select
             value={selectedSkuId ?? ''}
             onChange={(e) => setSelectedSkuId(Number(e.target.value))}
@@ -352,7 +352,7 @@ export default function ForecastEngine() {
                 </span>
               </div>
             ) : (
-              <p style={{ color: '#94a3b8', fontSize: '14px' }}>Select a drug to view forecast</p>
+              <p style={{ color: '#94a3b8', fontSize: '14px' }}>Select a product to view forecast</p>
             )}
             <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
               Historical actuals + 90-day forecast with confidence band
@@ -374,7 +374,7 @@ export default function ForecastEngine() {
         ) : !selectedSku ? (
           <div style={{ height: 380, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
             <div style={{ fontSize: 48, opacity: 0.2 }}>📈</div>
-            <p style={{ color: '#94a3b8', fontSize: 14 }}>Select a drug above to load the forecast</p>
+            <p style={{ color: '#94a3b8', fontSize: 14 }}>Select a product above to load the forecast</p>
           </div>
         ) : rows.length === 0 ? (
           <div style={{ height: 380, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

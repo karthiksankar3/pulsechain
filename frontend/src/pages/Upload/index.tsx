@@ -493,7 +493,7 @@ function Step3Confirm({ upload, mapping, onBack }: { upload: UploadResponse; map
         <input
           value={orgName}
           onChange={(e) => setOrgName(e.target.value)}
-          placeholder="e.g. Acme Pharma"
+          placeholder="e.g. Acme Corp"
           style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 14, color: '#0f172a', outline: 'none', boxSizing: 'border-box', backgroundColor: '#fff' }}
         />
       </div>

@@ -234,7 +234,7 @@ function App() {
           <Route path="/dashboard" element={<AppShell title="Dashboard"><Dashboard /></AppShell>} />
           <Route path="/forecast" element={<AppShell title="Forecast Engine"><ForecastEngine /></AppShell>} />
           <Route path="/inventory" element={<AppShell title="Inventory Intelligence"><InventoryIntelligence /></AppShell>} />
-          <Route path="/pharma-pulse" element={<AppShell title="PharmaPulse"><PharmaPulse /></AppShell>} />
+          <Route path="/pharma-pulse" element={<AppShell title="MarketPulse"><PharmaPulse /></AppShell>} />
           <Route path="/scenarios" element={<AppShell title="Scenario Planning"><ScenarioPlanning /></AppShell>} />
           <Route path="/sop" element={<AppShell title="S&OP Console"><SOPConsole /></AppShell>} />
           <Route path="/upload" element={<AppShell title="Upload Data"><Upload /></AppShell>} />

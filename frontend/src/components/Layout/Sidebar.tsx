@@ -4,7 +4,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard',       path: '/dashboard',    icon: '🏠' },
   { label: 'Forecast Engine', path: '/forecast',     icon: '📈' },
   { label: 'Inventory',       path: '/inventory',    icon: '📦' },
-  { label: 'PharmaPulse',     path: '/pharma-pulse', icon: '🔥' },
+  { label: 'MarketPulse',      path: '/pharma-pulse', icon: '🔥' },
   { label: 'Scenarios',       path: '/scenarios',    icon: '🔀' },
   { label: 'S&OP Console',    path: '/sop',          icon: '📋' },
   { label: 'Upload Data',     path: '/upload',       icon: '⬆️' },
@@ -16,7 +16,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
         <div style={{ fontSize: '18px', fontWeight: 700, color: '#00D4B4', letterSpacing: '-0.02em' }}>PulseChain</div>
-        <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>Pharma Demand Planning</div>
+        <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>Demand Planning</div>
       </div>
 
       {/* Nav */}

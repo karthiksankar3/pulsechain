@@ -126,7 +126,7 @@ function ConsensusTable({ rows, loading, onExport }: { rows: ConsensusRow[]; loa
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ backgroundColor: '#f8fafc' }}>
-              {['Drug', 'ATC', 'Statistical', 'Field', 'Consensus', 'Variance %', 'Status'].map((h) => (
+              {['Product', 'Code', 'Statistical', 'Field', 'Consensus', 'Variance %', 'Status'].map((h) => (
                 <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#94a3b8', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>
                   {h}
                 </th>
@@ -264,12 +264,12 @@ function SAPExport({ onExport }: { onExport: () => void }) {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <p style={{ fontSize: 13, color: '#94a3b8' }}>SAP-APO compatible format — preview of first 5 rows</p>
+        <p style={{ fontSize: 13, color: '#94a3b8' }}>ERP compatible format — preview of first 5 rows</p>
         <button
           onClick={onExport}
           style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#00D4B4,#0099a8)', color: '#0A1628', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
         >
-          ⬇ Export SAP-APO Format
+          ⬇ Export ERP Format
         </button>
       </div>
       <div style={{ overflowX: 'auto', borderRadius: 12, border: '1px solid #e2e8f0' }}>
@@ -385,7 +385,7 @@ export default function SOPConsole() {
         <VersionTable rows={versions} loading={loading.versions} />
       </Section>
 
-      <Section title="SAP Export">
+      <Section title="ERP Export">
         <SAPExport onExport={handleSAPExport} />
       </Section>
     </div>

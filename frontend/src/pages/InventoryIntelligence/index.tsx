@@ -332,8 +332,8 @@ function SKUTable({ skus, loading, selectedCell, selectedSkuId, onSelectSku }: S
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr>
-              <th style={th}>Drug</th>
-              <th style={th}>ATC</th>
+              <th style={th}>Product</th>
+              <th style={th}>Code</th>
               <th style={th}><SortBtn col="dos" label="DOS" /></th>
               <th style={th}><SortBtn col="current_stock" label="Stock" /></th>
               <th style={th}><SortBtn col="stockout_probability_30d" label="Risk 30d" /></th>
@@ -477,7 +477,7 @@ function SafetyStockCalculator({ skus, selectedSkuId, onSelectSku }: SafetyStock
           appearance: 'none',
         }}
       >
-        <option value="" disabled>Select a drug…</option>
+        <option value="" disabled>Select a product…</option>
         {skus.map((s) => (
           <option key={s.sku_id} value={s.sku_id}>
             {s.atc_code} — {s.sku_name.split(' (')[0]}
@@ -605,7 +605,7 @@ function StockoutPanel({ detail, loading }: StockoutPanelProps) {
 
       {!detail && !loading && (
         <p style={{ fontSize: '13px', color: '#94a3b8', textAlign: 'center', padding: '20px 0' }}>
-          Select a drug from the table above
+          Select a product from the table above
         </p>
       )}
 

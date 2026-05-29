@@ -149,7 +149,7 @@ function TrendChart({ signals }: { signals: TherapySignal[] }) {
 
   return (
     <div style={{ ...card, padding: 20 }}>
-      <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Weekly Signal Score — All Therapy Areas</p>
+      <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Weekly Signal Score — All Categories</p>
       <ResponsiveContainer width="100%" height={220}>
         <LineChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: -20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -277,7 +277,7 @@ function RedditFeed({ outbreak, sentiment }: { outbreak: OutbreakSignal[]; senti
 
       {sentiment.length > 0 && (
         <div>
-          <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: 10 }}>Drug Sentiment</p>
+          <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: 10 }}>Product Sentiment</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {sentiment.slice(0, 3).map((drug) => (
               <div key={drug.drug_name}>
@@ -312,7 +312,7 @@ function ForecastAdjTable({ adjustments }: { adjustments: ForecastAdjustment[] }
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ backgroundColor: '#f8fafc' }}>
-              {['SKU', 'ATC', 'Therapy Area', 'Signal', 'Adjustment', 'Confidence', 'Reasoning'].map((h) => (
+              {['SKU', 'Code', 'Category', 'Signal', 'Adjustment', 'Confidence', 'Reasoning'].map((h) => (
                 <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#94a3b8', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>
                   {h}
                 </th>
