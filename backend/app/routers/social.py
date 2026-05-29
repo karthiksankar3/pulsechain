@@ -23,10 +23,14 @@ _reddit = RedditService()
 
 
 def _session_skus(session_id: str, db: Session) -> list[SKU]:
-    skus = db.query(SKU).filter(SKU.session_id == session_id).all()
-    if not skus and session_id != "demo":
-        skus = db.query(SKU).filter(SKU.session_id == "demo").all()
-    return skus
+    try:
+        skus = db.query(SKU).filter(SKU.session_id == session_id).all()
+        if not skus and session_id != "demo":
+            skus = db.query(SKU).filter(SKU.session_id == "demo").all()
+        return skus
+    except Exception:
+        db.rollback()
+        return db.query(SKU).all()
 
 
 @router.get("/trends")

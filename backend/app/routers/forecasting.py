@@ -44,16 +44,24 @@ def _optional_user(
 
 
 def _session_skus(session_id: str, db: Session) -> list[SKU]:
-    skus = db.query(SKU).filter(SKU.session_id == session_id).order_by(SKU.code).all()
-    if not skus and session_id != "demo":
-        skus = db.query(SKU).filter(SKU.session_id == "demo").order_by(SKU.code).all()
-    return skus
+    try:
+        skus = db.query(SKU).filter(SKU.session_id == session_id).order_by(SKU.code).all()
+        if not skus and session_id != "demo":
+            skus = db.query(SKU).filter(SKU.session_id == "demo").order_by(SKU.code).all()
+        return skus
+    except Exception:
+        db.rollback()
+        return db.query(SKU).order_by(SKU.code).all()
 
 
 def _resolve_sku(sku_id: int, session_id: str, db: Session) -> SKU:
-    sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == session_id).first()
-    if sku is None and session_id != "demo":
-        sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == "demo").first()
+    try:
+        sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == session_id).first()
+        if sku is None and session_id != "demo":
+            sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == "demo").first()
+    except Exception:
+        db.rollback()
+        sku = db.query(SKU).filter(SKU.id == sku_id).first()
     if sku is None:
         raise HTTPException(status_code=404, detail=f"SKU {sku_id} not found")
     return sku

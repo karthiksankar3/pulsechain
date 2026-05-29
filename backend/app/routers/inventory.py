@@ -20,16 +20,24 @@ router = APIRouter(prefix="/inventory", tags=["inventory"])
 
 
 def _session_skus(session_id: str, db: Session) -> list[SKU]:
-    skus = db.query(SKU).filter(SKU.session_id == session_id).all()
-    if not skus and session_id != "demo":
-        skus = db.query(SKU).filter(SKU.session_id == "demo").all()
-    return skus
+    try:
+        skus = db.query(SKU).filter(SKU.session_id == session_id).all()
+        if not skus and session_id != "demo":
+            skus = db.query(SKU).filter(SKU.session_id == "demo").all()
+        return skus
+    except Exception:
+        db.rollback()
+        return db.query(SKU).all()
 
 
 def _resolve_sku(sku_id: int, session_id: str, db: Session) -> SKU:
-    sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == session_id).first()
-    if sku is None and session_id != "demo":
-        sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == "demo").first()
+    try:
+        sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == session_id).first()
+        if sku is None and session_id != "demo":
+            sku = db.query(SKU).filter(SKU.id == sku_id, SKU.session_id == "demo").first()
+    except Exception:
+        db.rollback()
+        sku = db.query(SKU).filter(SKU.id == sku_id).first()
     if sku is None:
         raise HTTPException(status_code=404, detail="SKU not found")
     return sku

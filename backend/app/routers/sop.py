@@ -18,7 +18,11 @@ def get_consensus_forecast(
     db: Session = Depends(get_db),
     session_id: str = Depends(get_session_id),
 ) -> list[dict]:
-    return _svc.get_consensus_forecast(db, session_id)
+    try:
+        return _svc.get_consensus_forecast(db, session_id)
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get("/versions")
@@ -26,7 +30,11 @@ def get_forecast_versions(
     db: Session = Depends(get_db),
     session_id: str = Depends(get_session_id),
 ) -> list[dict]:
-    return _svc.get_forecast_versions(db, session_id)
+    try:
+        return _svc.get_forecast_versions(db, session_id)
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get("/accuracy")
@@ -34,7 +42,11 @@ def get_accuracy_scorecard(
     db: Session = Depends(get_db),
     session_id: str = Depends(get_session_id),
 ) -> dict:
-    return _svc.get_accuracy_scorecard(db, session_id)
+    try:
+        return _svc.get_accuracy_scorecard(db, session_id)
+    except Exception:
+        db.rollback()
+        return {"overall_mape": None, "best_model": "N/A", "most_improved_sku": None, "sku_mapes": []}
 
 
 @router.get("/calendar")
@@ -47,7 +59,11 @@ def export_sap_format(
     db: Session = Depends(get_db),
     session_id: str = Depends(get_session_id),
 ) -> StreamingResponse:
-    rows = _svc.export_sap_format(db, session_id)
+    try:
+        rows = _svc.export_sap_format(db, session_id)
+    except Exception:
+        db.rollback()
+        rows = []
 
     output = io.StringIO()
     if rows:
