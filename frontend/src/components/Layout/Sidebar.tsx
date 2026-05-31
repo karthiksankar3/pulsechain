@@ -1,4 +1,6 @@
 import { NavLink } from 'react-router-dom'
+import { useIsMobile } from '../../hooks/useIsMobile'
+import { useUIStore } from '../../store'
 
 const NAV_ITEMS = [
   { label: 'Dashboard',       path: '/dashboard',    icon: '🏠' },
@@ -11,12 +13,34 @@ const NAV_ITEMS = [
 ]
 
 export default function Sidebar() {
+  const isMobile = useIsMobile()
+  const { setSidebarOpen } = useUIStore()
+
+  function handleNavClick() {
+    if (isMobile) setSidebarOpen(false)
+  }
+
   return (
     <>
-      {/* Logo */}
-      <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
-        <div style={{ fontSize: '18px', fontWeight: 700, color: '#00D4B4', letterSpacing: '-0.02em' }}>PulseChain</div>
-        <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>Demand Planning</div>
+      {/* Logo + close button on mobile */}
+      <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontSize: '18px', fontWeight: 700, color: '#00D4B4', letterSpacing: '-0.02em' }}>PulseChain</div>
+          <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>Demand Planning</div>
+        </div>
+        {isMobile && (
+          <button
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close menu"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: '#94a3b8', fontSize: 20, lineHeight: 1,
+              padding: '4px', borderRadius: 6, minHeight: 0,
+            }}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -25,6 +49,7 @@ export default function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={handleNavClick}
             style={({ isActive }) => ({
               display: 'flex',
               alignItems: 'center',
@@ -39,6 +64,7 @@ export default function Sidebar() {
               borderLeft: isActive ? '2px solid #00D4B4' : '2px solid transparent',
               textDecoration: 'none',
               transition: 'all 0.15s',
+              minHeight: 0,
             })}
           >
             <span style={{ fontSize: '15px', width: '20px', textAlign: 'center', flexShrink: 0 }}>{item.icon}</span>

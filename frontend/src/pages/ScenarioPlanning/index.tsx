@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import {
   Area,
   CartesianGrid,
@@ -143,6 +144,7 @@ function CompareTable({ scenarios }: { scenarios: ScenarioResult[] }) {
 const ICON_MAP: Record<string, string> = { up: '↑', down: '↓', neutral: '→' }
 
 export default function ScenarioPlanning() {
+  const isMobile = useIsMobile()
   const [skus, setSkus] = useState<SKUResponse[]>([])
   const [templates, setTemplates] = useState<Record<string, ScenarioTemplate>>({})
   const [selectedSku, setSelectedSku] = useState<number | null>(null)
@@ -319,7 +321,7 @@ export default function ScenarioPlanning() {
           </div>
         )}
 
-        <div style={{ height: 380 }}>
+        <div style={{ height: isMobile ? 250 : 380 }}>
           <ScenarioChart result={currentResult} loading={runLoading} />
         </div>
       </div>

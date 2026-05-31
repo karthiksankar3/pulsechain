@@ -1,5 +1,6 @@
 import { type CSSProperties, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 const FEATURES = [
   { icon: '🤖', title: 'AI Forecasting', desc: 'Prophet + XGBoost + Ensemble models with inverse-MAPE weighting for enterprise-grade accuracy.' },
@@ -139,6 +140,7 @@ function NameGateModal({ onEnter }: { onEnter: (name: string) => void }) {
 
 export default function Landing() {
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const [showGate, setShowGate] = useState(false)
   const [pendingPath, setPendingPath] = useState('/dashboard')
 
@@ -180,7 +182,7 @@ export default function Landing() {
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
         height: 60, backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 40px',
+        padding: isMobile ? '0 16px' : '0 40px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 20, fontWeight: 700, color: '#00D4B4', letterSpacing: '-0.02em' }}>PulseChain</span>
@@ -189,7 +191,7 @@ export default function Landing() {
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => goTo('/dashboard')} style={navBtnOutline}>Log in</button>
+          {!isMobile && <button onClick={() => goTo('/dashboard')} style={navBtnOutline}>Log in</button>}
           <button onClick={() => goTo('/dashboard')} style={navBtnFill}>Get Started</button>
         </div>
       </header>
@@ -198,7 +200,7 @@ export default function Landing() {
       <section style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-        paddingTop: 80, paddingBottom: 80, paddingLeft: 40, paddingRight: 40,
+        paddingTop: 80, paddingBottom: 80, paddingLeft: isMobile ? 20 : 40, paddingRight: isMobile ? 20 : 40,
         background: 'radial-gradient(ellipse 80% 50% at 50% 40%, rgba(0,212,180,0.07) 0%, transparent 70%), #ffffff',
       }}>
         <div style={{ maxWidth: 720 }}>
@@ -208,10 +210,10 @@ export default function Landing() {
           </p>
 
           {/* Headline */}
-          <h1 style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, color: '#0f172a', margin: 0, letterSpacing: '-0.03em' }}>
+          <h1 style={{ fontSize: isMobile ? 36 : 64, fontWeight: 800, lineHeight: 1.1, color: '#0f172a', margin: 0, letterSpacing: '-0.03em' }}>
             From Market Signal to
           </h1>
-          <h1 style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, color: '#00D4B4', margin: 0, marginBottom: 20, letterSpacing: '-0.03em' }}>
+          <h1 style={{ fontSize: isMobile ? 36 : 64, fontWeight: 800, lineHeight: 1.1, color: '#00D4B4', margin: 0, marginBottom: 20, letterSpacing: '-0.03em' }}>
             Supply Decision
           </h1>
 
@@ -221,7 +223,7 @@ export default function Landing() {
           </p>
 
           {/* CTA buttons */}
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 40, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 16, justifyContent: 'center', alignItems: 'center', marginTop: 40 }}>
             <button
               onClick={() => goTo('/dashboard')}
               style={{ backgroundColor: '#00D4B4', color: '#0A1628', fontWeight: 700, fontSize: 16, padding: '16px 32px', borderRadius: 16, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,212,180,0.25)', transition: 'all 0.15s' }}
@@ -263,7 +265,7 @@ export default function Landing() {
           <p style={{ fontSize: 16, color: '#64748b', textAlign: 'center', marginBottom: 48, marginTop: 0 }}>
             From AI forecasting to ERP export
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 24 }}>
             {FEATURES.map((f) => (
               <FeatureCard key={f.title} {...f} />
             ))}

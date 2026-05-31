@@ -1,4 +1,5 @@
 import { type CSSProperties, useEffect, useState } from 'react'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import {
   CartesianGrid,
   Legend,
@@ -360,6 +361,7 @@ interface PageState {
 }
 
 export default function PharmaPulse() {
+  const isMobile = useIsMobile()
   const [state, setState] = useState<PageState>({
     loading: true, ticker: [], signals: [], headlines: [], outbreak: [], sentiment: [], adjustments: [], error: null,
   })
@@ -402,7 +404,7 @@ export default function PharmaPulse() {
       {/* Signal cards */}
       <div style={{ marginBottom: 20 }}>
         <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: 12 }}>Demand Signal Index</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 2 : 5}, 1fr)`, gap: isMobile ? 10 : 16 }}>
           {state.signals.map((sig) => (
             <SignalCard key={sig.therapy_area} sig={sig} />
           ))}
@@ -410,13 +412,13 @@ export default function PharmaPulse() {
       </div>
 
       {/* Chart + Heatmap */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: 20, marginBottom: 20 }}>
         <TrendChart signals={state.signals} />
         <IndiaHeatmap signals={state.signals} />
       </div>
 
       {/* News + Reddit */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20, marginBottom: 20 }}>
         <NewsFeed headlines={state.headlines} />
         <RedditFeed outbreak={state.outbreak} sentiment={state.sentiment} />
       </div>

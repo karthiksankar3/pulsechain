@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import {
   Area,
   ComposedChart,
@@ -192,6 +193,7 @@ function MetricCard({ label, value, unit = '%', colorFn = mapeColor, showArrow =
 // ------------------------------------------------------------------ //
 
 export default function ForecastEngine() {
+  const isMobile = useIsMobile()
   const { selectedSkuId, selectedModel, timeRange, setSelectedSkuId, setSelectedModel, setTimeRange } =
     useForecastStore()
 
@@ -297,7 +299,7 @@ export default function ForecastEngine() {
       {/* ── ROW 1: Controls bar ───────────────────────────────────── */}
       <div style={{ ...card, padding: '20px', display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '20px', flexWrap: 'wrap' }}>
         {/* Drug selector */}
-        <div>
+        <div style={{ width: isMobile ? '100%' : 'auto' }}>
           <span style={labelStyle}>Product / SKU</span>
           <select
             value={selectedSkuId ?? ''}
@@ -307,7 +309,7 @@ export default function ForecastEngine() {
               border: '1px solid #e2e8f0', borderRadius: '10px',
               padding: '10px 16px', fontSize: '14px', color: '#0f172a',
               background: '#fff', outline: 'none', cursor: 'pointer',
-              minWidth: '280px', appearance: 'none',
+              width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : '280px', appearance: 'none',
             }}
           >
             {loadingSkus
@@ -320,12 +322,12 @@ export default function ForecastEngine() {
           </select>
         </div>
 
-        <div style={{ width: 1, height: 40, background: '#e2e8f0', flexShrink: 0 }} />
+        {!isMobile && <div style={{ width: 1, height: 40, background: '#e2e8f0', flexShrink: 0 }} />}
 
         {/* Model tabs */}
-        <div>
+        <div style={{ width: isMobile ? '100%' : 'auto' }}>
           <span style={labelStyle}>Model</span>
-          <div style={{ display: 'flex', gap: '4px' }}>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
             {MODELS.map((m) => (
               <button
                 key={m.key}
@@ -338,12 +340,12 @@ export default function ForecastEngine() {
           </div>
         </div>
 
-        <div style={{ width: 1, height: 40, background: '#e2e8f0', flexShrink: 0 }} />
+        {!isMobile && <div style={{ width: 1, height: 40, background: '#e2e8f0', flexShrink: 0 }} />}
 
         {/* Time range tabs */}
-        <div>
+        <div style={{ width: isMobile ? '100%' : 'auto' }}>
           <span style={labelStyle}>Time Range</span>
-          <div style={{ display: 'flex', gap: '4px' }}>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
             {availableRanges.map((r) => (
               <button
                 key={r}
@@ -356,8 +358,8 @@ export default function ForecastEngine() {
           </div>
         </div>
 
-        {/* Run button pushed to right */}
-        <div style={{ marginLeft: 'auto' }}>
+        {/* Run button */}
+        <div style={{ marginLeft: isMobile ? undefined : 'auto', width: isMobile ? '100%' : undefined }}>
           <button
             onClick={handleRunForecast}
             disabled={running || !selectedSku}
@@ -366,8 +368,8 @@ export default function ForecastEngine() {
               padding: '10px 24px', borderRadius: '12px', border: 'none',
               cursor: running || !selectedSku ? 'not-allowed' : 'pointer',
               opacity: running || !selectedSku ? 0.5 : 1,
-              fontSize: '14px', display: 'flex', alignItems: 'center', gap: 8,
-              transition: 'opacity 0.15s',
+              fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'opacity 0.15s', width: isMobile ? '100%' : undefined,
             }}
           >
             {running && (
@@ -414,14 +416,14 @@ export default function ForecastEngine() {
 
         {/* Chart */}
         {loadingChart ? (
-          <div className="animate-pulse bg-slate-100 rounded-xl" style={{ height: 380, width: '100%' }} />
+          <div className="animate-pulse bg-slate-100 rounded-xl" style={{ height: isMobile ? 250 : 380, width: '100%' }} />
         ) : !selectedSku ? (
-          <div style={{ height: 380, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+          <div style={{ height: isMobile ? 250 : 380, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
             <div style={{ fontSize: 48, opacity: 0.2 }}>📈</div>
             <p style={{ color: '#94a3b8', fontSize: 14 }}>Select a product above to load the forecast</p>
           </div>
         ) : rows.length === 0 ? (
-          <div style={{ height: 380, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ height: isMobile ? 250 : 380, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <p style={{ color: '#94a3b8', fontSize: 14 }}>No data available</p>
           </div>
         ) : (
@@ -433,7 +435,7 @@ export default function ForecastEngine() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <ResponsiveContainer width="100%" height={380}>
+              <ResponsiveContainer width="100%" height={isMobile ? 250 : 380}>
                 <ComposedChart data={rows} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis
@@ -487,7 +489,7 @@ export default function ForecastEngine() {
       </div>
 
       {/* ── ROW 3: 4 KPI metric cards ─────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 2 : 4}, 1fr)`, gap: isMobile ? '12px' : '20px', marginBottom: isMobile ? '12px' : '20px' }}>
         {loadingAccuracy ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div key={i} style={{ ...card, padding: '20px', height: '100px' }}>
@@ -528,7 +530,7 @@ export default function ForecastEngine() {
       </div>
 
       {/* ── ROW 4: Model comparison + Portfolio ────────────────────── */}
-      <div style={{ display: 'flex', gap: '20px' }}>
+      <div style={{ display: 'flex', gap: '20px', flexDirection: isMobile ? 'column' : 'row' }}>
         {/* Model comparison */}
         <div style={{ ...card, flex: 1, minWidth: 0, padding: '24px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0f172a', marginBottom: '16px', marginTop: 0 }}>
@@ -594,8 +596,8 @@ export default function ForecastEngine() {
           </div>
         </div>
 
-        {/* Portfolio overview */}
-        <div style={{ ...card, flex: 1, minWidth: 0, padding: '24px' }}>
+        {/* Portfolio overview — hidden on mobile */}
+        <div style={{ ...card, flex: 1, minWidth: 0, padding: '24px', display: isMobile ? 'none' : 'block' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0f172a', marginBottom: '4px', marginTop: 0 }}>
             Portfolio Overview
           </h3>

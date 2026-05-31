@@ -1,5 +1,6 @@
 import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import { uploadApi, type CurrentDatasetInfo, type MapColumnsResponse, type UploadResponse } from '../../services/api'
 
 type Step = 1 | 2 | 3
@@ -122,6 +123,7 @@ function StepBar({ current }: { current: Step }) {
 // ---- Step 1: Upload File -------------------------------------------
 
 function Step1Upload({ onSuccess }: { onSuccess: (resp: UploadResponse) => void }) {
+  const isMobile = useIsMobile()
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -180,7 +182,7 @@ function Step1Upload({ onSuccess }: { onSuccess: (resp: UploadResponse) => void 
         style={{
           border: `2px dashed ${dragging ? '#00D4B4' : '#e2e8f0'}`,
           borderRadius: 20,
-          padding: '64px 32px',
+          padding: isMobile ? '32px 20px' : '64px 32px',
           textAlign: 'center',
           cursor: 'pointer',
           backgroundColor: dragging ? 'rgba(0,212,180,0.04)' : '#fafafa',
@@ -540,13 +542,14 @@ function Step3Confirm({ upload, mapping, onBack }: { upload: UploadResponse; map
 // ---- Main page ------------------------------------------------------
 
 export default function Upload() {
+  const isMobile = useIsMobile()
   const [step, setStep] = useState<Step>(1)
   const [upload, setUpload] = useState<UploadResponse | null>(null)
   const [mapping, setMapping] = useState<Record<string, string>>({})
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100%', padding: 24 }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ background: '#f8fafc', minHeight: '100%', padding: isMobile ? 16 : 24 }}>
+      <div style={{ maxWidth: isMobile ? '100%' : 720, margin: '0 auto' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>

@@ -23,6 +23,12 @@ html, body, #root {
   --font-body: 'DM Sans', sans-serif;
 }
 
+body { overflow-x: hidden; }
+
+.sidebar-mobile { transition: transform 0.3s ease; }
+
+button, a { min-height: 44px; }
+
 .scrollable { overflow-y: auto; overflow-x: hidden; }
 .scrollable::-webkit-scrollbar { width: 4px; }
 .scrollable::-webkit-scrollbar-track { background: transparent; }

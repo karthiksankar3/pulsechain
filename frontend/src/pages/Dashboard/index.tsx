@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import {
   Area,
   AreaChart,
@@ -38,20 +39,23 @@ interface KPICardProps {
   sub: string
   color: string
   loading?: boolean
+  compact?: boolean
 }
 
-function KPICard({ label, value, sub, color, loading }: KPICardProps) {
+function KPICard({ label, value, sub, color, loading, compact }: KPICardProps) {
+  const p = compact ? '14px' : '24px'
+  const vSize = compact ? '36px' : '48px'
   if (loading) {
     return (
-      <div style={{ ...card, padding: '24px', height: '130px' }}>
+      <div style={{ ...card, padding: p, height: compact ? '100px' : '130px' }}>
         <div className="animate-pulse bg-slate-100 rounded-lg" style={{ height: '100%' }} />
       </div>
     )
   }
   return (
-    <div style={{ ...card, padding: '24px' }}>
+    <div style={{ ...card, padding: p }}>
       <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8' }}>{label}</p>
-      <p style={{ fontSize: '48px', fontWeight: 700, lineHeight: 1, marginTop: '8px', marginBottom: '8px', color }}>{value}</p>
+      <p style={{ fontSize: vSize, fontWeight: 700, lineHeight: 1, marginTop: '8px', marginBottom: '8px', color }}>{value}</p>
       <p style={{ fontSize: '12px', color: '#94a3b8' }}>{sub}</p>
     </div>
   )
@@ -118,6 +122,7 @@ function AlertFeed({ alerts, loading }: { alerts: Alert[]; loading: boolean }) {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const userName = localStorage.getItem('pulsechain_user_name') || 'User'
   const [health, setHealth] = useState<InventoryHealthData | null>(null)
   const [inventory, setInventory] = useState<InventorySKU[]>([])
@@ -198,7 +203,7 @@ export default function Dashboard() {
 
       {/* Welcome banner — no card wrapper */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+        <h1 style={{ fontSize: isMobile ? '20px' : '28px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
           {greeting()}, {userName} 👋
         </h1>
         <p style={{ fontSize: '14px', color: '#64748b', marginTop: '6px' }}>
@@ -209,13 +214,14 @@ export default function Dashboard() {
       </div>
 
       {/* KPI row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 2 : 4}, 1fr)`, gap: isMobile ? '12px' : '20px', marginBottom: isMobile ? '12px' : '20px' }}>
         <KPICard
           label="Portfolio Forecast Accuracy"
           value={avgMape != null ? `${avgMape}%` : '—'}
           sub="Avg MAPE across all SKUs"
           color="#00D4B4"
           loading={loading.kpi}
+          compact={isMobile}
         />
         <KPICard
           label="Stockout Risk"
@@ -223,6 +229,7 @@ export default function Dashboard() {
           sub="SKUs at critical stock level"
           color="#ef4444"
           loading={loading.kpi}
+          compact={isMobile}
         />
         <KPICard
           label="Demand Signals"
@@ -230,6 +237,7 @@ export default function Dashboard() {
           sub="PharmaPulse monitored SKUs"
           color="#a78bfa"
           loading={loading.kpi}
+          compact={isMobile}
         />
         <KPICard
           label="Days Until S&OP"
@@ -237,11 +245,12 @@ export default function Dashboard() {
           sub="Next consensus meeting"
           color="#FF6B35"
           loading={loading.kpi}
+          compact={isMobile}
         />
       </div>
 
       {/* Chart + Alerts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '12px' : '20px', marginBottom: isMobile ? '12px' : '20px' }}>
         {/* Mini chart */}
         <div style={{ ...card, padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -303,14 +312,14 @@ export default function Dashboard() {
       </div>
 
       {/* Quick actions */}
-      <div style={{ display: 'flex', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 2 : 4}, 1fr)`, gap: '12px' }}>
         {quickActions.map((action) => (
           <button
             key={action.path}
             onClick={() => navigate(action.path)}
             style={{
-              flex: 1, display: 'flex', alignItems: 'center', gap: '12px',
-              padding: '16px 20px', background: '#fff',
+              display: 'flex', alignItems: 'center', gap: '12px',
+              padding: isMobile ? '12px 14px' : '16px 20px', background: '#fff',
               border: '1px solid #e2e8f0', borderRadius: '12px',
               cursor: 'pointer', transition: 'all 0.15s',
               boxShadow: '0 1px 2px rgba(0,0,0,0.05)',

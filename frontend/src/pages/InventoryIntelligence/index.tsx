@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import {
   Bar,
   BarChart,
@@ -726,6 +727,7 @@ function ExpiryRiskChart({ skus, loading }: ExpiryChartProps) {
 // ------------------------------------------------------------------ //
 
 export default function InventoryIntelligence() {
+  const isMobile = useIsMobile()
   const [health, setHealth] = useState<InventoryHealthData | null>(null)
   const [skus, setSkus] = useState<InventorySKU[]>([])
   const [abcxyz, setAbcxyz] = useState<ABCXYZItem[]>([])
@@ -777,7 +779,7 @@ export default function InventoryIntelligence() {
     <div style={{ background: '#f8fafc', minHeight: '100%', padding: '24px' }}>
 
       {/* ── Section 1: KPI Strip ───────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isMobile ? 2 : 5}, 1fr)`, gap: isMobile ? '10px' : '16px', marginBottom: '20px' }}>
         {loadingMain
           ? Array.from({ length: 5 }).map((_, i) => (
               <div key={i} style={{ ...card, height: '104px' }}>
@@ -798,7 +800,7 @@ export default function InventoryIntelligence() {
       </div>
 
       {/* ── Section 2: Matrix + Table ──────────────────────────────── */}
-      <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '20px', marginBottom: '20px' }}>
         {/* Left: ABC-XYZ matrix */}
         <div style={{ ...card, flex: 1, minWidth: 0 }}>
           <AnimatePresence>
@@ -824,7 +826,7 @@ export default function InventoryIntelligence() {
       </div>
 
       {/* ── Section 3: Calculator + Stockout + Expiry ─────────────── */}
-      <div style={{ display: 'flex', gap: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '20px' }}>
         <div style={{ ...card, flex: 1, minWidth: 0 }}>
           <SafetyStockCalculator skus={skus} selectedSkuId={selectedSkuId} onSelectSku={setSelectedSkuId} />
         </div>
