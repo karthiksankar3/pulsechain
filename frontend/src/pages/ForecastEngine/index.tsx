@@ -89,9 +89,17 @@ function fmtDate(dateStr: string): string {
 function buildChartData(data: SKUChartData, range: TimeRange): ChartRow[] {
   const { historicalDays, forecastDays } = TIME_RANGE_DAYS[range]
 
-  const historical: ChartRow[] = data.historical
-    .slice(-historicalDays)
-    .map((h) => ({ date: h.date, actual: h.actual, forecast: null, lower: null, upper: null, band: null }))
+  let historicalSlice = data.historical
+  if (data.historical.length > 0) {
+    const lastDate = new Date(data.historical[data.historical.length - 1].date)
+    const cutoff = new Date(lastDate)
+    cutoff.setDate(cutoff.getDate() - historicalDays)
+    historicalSlice = data.historical.filter((h) => new Date(h.date) >= cutoff)
+  }
+
+  const historical: ChartRow[] = historicalSlice.map((h) => ({
+    date: h.date, actual: h.actual, forecast: null, lower: null, upper: null, band: null,
+  }))
 
   const forecastRows: ChartRow[] = data.forecast.slice(0, forecastDays).map((f) => ({
     date: f.date,
@@ -257,7 +265,12 @@ export default function ForecastEngine() {
   }
 
   const selectedSku = skus.find((s) => s.id === selectedSkuId) ?? null
-  const availableDays = chartData ? chartData.historical.length : 365
+  const availableDays = chartData && chartData.historical.length > 1
+    ? Math.round(
+        (new Date(chartData.historical[chartData.historical.length - 1].date).getTime() -
+          new Date(chartData.historical[0].date).getTime()) / 86400000,
+      )
+    : 365
   const availableRanges = getTimeRanges(availableDays)
   const rows = chartData ? buildChartData(chartData, timeRange) : []
   const current = accuracy?.find((m) => m.model_name === selectedModel) ?? null

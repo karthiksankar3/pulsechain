@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -181,10 +181,9 @@ def get_latest_forecast(
 ) -> SKUChartData:
     sku = _resolve_sku(sku_id, session_id, db)
 
-    cutoff = datetime.now(timezone.utc).date() - timedelta(days=730)
     rows = (
         db.query(SalesRecord.sale_date, SalesRecord.quantity)
-        .filter(SalesRecord.sku_id == sku_id, SalesRecord.sale_date >= cutoff)
+        .filter(SalesRecord.sku_id == sku_id)
         .order_by(SalesRecord.sale_date)
         .all()
     )

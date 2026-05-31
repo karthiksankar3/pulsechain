@@ -144,6 +144,8 @@ class ForecastingEngine:
         horizon_days: int = 90,
         sku_id: int = 0,
     ) -> ForecastResult:
+        if not hasattr(np, 'float_'):
+            np.float_ = np.float64  # type: ignore[attr-defined]
         from prophet import Prophet  # lazy import — avoids slow startup
 
         if len(df) < 14:
@@ -241,6 +243,14 @@ class ForecastingEngine:
         yhat = fc.predicted_mean
         ci = fc.conf_int(alpha=0.05)
 
+        # statsmodels may return DataFrame or ndarray depending on version
+        if hasattr(ci, 'iloc'):
+            ci_lower = ci.iloc[:, 0]
+            ci_upper = ci.iloc[:, 1]
+        else:
+            ci_lower = ci[:, 0]
+            ci_upper = ci[:, 1]
+
         last_date = df["ds"].max()
         dates = [
             str((last_date + timedelta(days=i + 1)).date()) for i in range(horizon_days)
@@ -251,8 +261,8 @@ class ForecastingEngine:
             sku_id=sku_id,
             dates=dates,
             forecast=[round(max(float(v), 0), 4) for v in yhat],
-            lower_bound=[round(max(float(v), 0), 4) for v in ci.iloc[:, 0]],
-            upper_bound=[round(max(float(v), 0), 4) for v in ci.iloc[:, 1]],
+            lower_bound=[round(max(float(v), 0), 4) for v in ci_lower],
+            upper_bound=[round(max(float(v), 0), 4) for v in ci_upper],
             mape=round(holdout_mape, 4),
         )
 
