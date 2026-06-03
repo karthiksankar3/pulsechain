@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard',       path: '/dashboard',    icon: '🏠' },
   { label: 'Forecast Engine', path: '/forecast',     icon: '📈' },
   { label: 'Inventory',       path: '/inventory',    icon: '📦' },
+  { label: 'Anomaly Detection', path: '/anomaly',     icon: '⚡' },
   { label: 'MarketPulse',      path: '/pharma-pulse', icon: '🔥' },
   { label: 'Scenarios',       path: '/scenarios',    icon: '🔀' },
   { label: 'S&OP Console',    path: '/sop',          icon: '📋' },

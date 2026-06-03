@@ -428,6 +428,61 @@ export interface CurrentDatasetInfo {
   uploaded_at: string | null
 }
 
+// ------------------------------------------------------------------ //
+// Anomaly Detection                                                   //
+// ------------------------------------------------------------------ //
+
+export interface AnomalyPoint {
+  date: string
+  actual: number
+  expected: number
+  deviation_pct: number
+  severity: number
+  type: 'DEMAND_SPIKE' | 'DEMAND_DROP'
+  probable_cause: string
+  recommended_action: string
+  sku_id?: number
+  sku_name?: string
+  atc_code?: string
+}
+
+export interface AnomalySummary {
+  total_anomalies: number
+  spikes: number
+  drops: number
+  critical_anomalies: number
+  most_anomalous_sku: string
+  latest_anomaly: AnomalyPoint | null
+  anomaly_rate: number
+}
+
+export interface TimelinePoint {
+  date: string
+  actual: number
+  rolling_mean: number | null
+  upper_bound: number | null
+  lower_bound: number | null
+  band: number | null
+  is_anomaly: boolean
+  anomaly_type: 'DEMAND_SPIKE' | 'DEMAND_DROP' | null
+}
+
+export interface TrendBreak {
+  date: string
+  direction: 'UP' | 'DOWN'
+  magnitude: number
+  cusum_value: number
+  description: string
+}
+
+export const anomalyApi = {
+  getSummary: () => api.get<AnomalySummary>('/anomaly/summary'),
+  getPortfolio: (daysBack = 365) => api.get<AnomalyPoint[]>(`/anomaly/portfolio?days_back=${daysBack}`),
+  getSKUAnomalies: (skuId: number) => api.get<AnomalyPoint[]>(`/anomaly/skus/${skuId}`),
+  getTimeline: (skuId: number) => api.get<TimelinePoint[]>(`/anomaly/skus/${skuId}/timeline`),
+  getTrends: (skuId: number) => api.get<TrendBreak[]>(`/anomaly/skus/${skuId}/trends`),
+}
+
 export const uploadApi = {
   uploadFile: (file: File) => {
     const form = new FormData()
