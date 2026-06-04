@@ -22,6 +22,7 @@ const SOPConsole = lazy(() => import('./pages/SOPConsole'))
 const Upload = lazy(() => import('./pages/Upload'))
 const Landing = lazy(() => import('./pages/Landing'))
 const AnomalyDetection = lazy(() => import('./pages/AnomalyDetection'))
+const SupplyDemandGap = lazy(() => import('./pages/SupplyDemandGap'))
 
 // ---- Name Gate -------------------------------------------------------
 
@@ -294,6 +295,7 @@ function App() {
           <Route path="/sop" element={<AppShell title="S&OP Console"><SOPConsole /></AppShell>} />
           <Route path="/upload" element={<AppShell title="Upload Data"><Upload /></AppShell>} />
           <Route path="/anomaly" element={<AppShell title="Anomaly Detection"><AnomalyDetection /></AppShell>} />
+          <Route path="/supply-gap" element={<AppShell title="Supply-Demand Gap"><SupplyDemandGap /></AppShell>} />
         </Routes>
       </Suspense>
     </BrowserRouter>

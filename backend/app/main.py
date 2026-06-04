@@ -7,7 +7,7 @@ from sqlalchemy import inspect, text
 
 from app.core.config import get_settings
 from app.core.database import Base, SessionLocal, engine
-from app.routers import anomaly, auth, forecasting, inventory, scenarios, social, sop, upload
+from app.routers import anomaly, auth, forecasting, inventory, scenarios, social, sop, supply_gap, upload
 
 settings = get_settings()
 
@@ -85,6 +85,7 @@ app.include_router(inventory.router)
 app.include_router(social.router)
 app.include_router(scenarios.router)
 app.include_router(sop.router)
+app.include_router(supply_gap.router)
 app.include_router(upload.router)
 
 

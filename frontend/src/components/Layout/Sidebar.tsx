@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { label: 'Forecast Engine', path: '/forecast',     icon: '📈' },
   { label: 'Inventory',       path: '/inventory',    icon: '📦' },
   { label: 'Anomaly Detection', path: '/anomaly',     icon: '⚡' },
+  { label: 'Supply-Demand Gap', path: '/supply-gap',  icon: '📊' },
   { label: 'MarketPulse',      path: '/pharma-pulse', icon: '🔥' },
   { label: 'Scenarios',       path: '/scenarios',    icon: '🔀' },
   { label: 'S&OP Console',    path: '/sop',          icon: '📋' },

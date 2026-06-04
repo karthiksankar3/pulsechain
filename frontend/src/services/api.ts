@@ -483,6 +483,66 @@ export const anomalyApi = {
   getTrends: (skuId: number) => api.get<TrendBreak[]>(`/anomaly/skus/${skuId}/trends`),
 }
 
+// ------------------------------------------------------------------ //
+// Supply-Demand Gap                                                   //
+// ------------------------------------------------------------------ //
+
+export interface GapWeek {
+  week_number: number
+  week_start: string
+  week_end: string
+  demand_forecast: number
+  available_supply: number
+  gap: number
+  gap_type: 'SURPLUS' | 'DEFICIT'
+  gap_severity: 'CRITICAL' | 'HIGH' | 'LOW' | 'HEALTHY'
+  recommended_order_qty: number
+}
+
+export interface SKUGapData {
+  sku_id: number
+  sku_name: string
+  atc_code: string
+  current_stock: number
+  unit_price: number
+  weeks: GapWeek[]
+  total_12_week_demand: number
+  gap_12_weeks: number
+  total_deficit: number
+  first_stockout_week: number | null
+  recommended_immediate_order: number
+  overall_status?: 'CRITICAL' | 'DEFICIT' | 'LOW' | 'HEALTHY'
+  urgency_rank?: number
+  total_recommended_order_qty?: number
+  total_recommended_order_value?: number
+  needs_immediate_action?: boolean
+}
+
+export interface GapSummary {
+  critical_count: number
+  deficit_count: number
+  healthy_count: number
+  surplus_count: number
+  total_deficit_units: number
+  total_surplus_units: number
+  total_recommended_order_value: number
+  weeks_to_first_stockout: number | null
+}
+
+export interface WaterfallPoint {
+  label: string
+  value: number
+  type: 'opening' | 'outflow' | 'inflow' | 'closing'
+  cumulative: number
+}
+
+export const supplyGapApi = {
+  getSummary: () => api.get<GapSummary>('/supply-gap/summary'),
+  getPortfolio: () => api.get<SKUGapData[]>('/supply-gap/portfolio'),
+  getSKUGap: (skuId: number) => api.get<SKUGapData>(`/supply-gap/skus/${skuId}`),
+  getWaterfall: (skuId: number) => api.get<WaterfallPoint[]>(`/supply-gap/skus/${skuId}/waterfall`),
+}
+
 export const uploadApi = {
   uploadFile: (file: File) => {
     const form = new FormData()
