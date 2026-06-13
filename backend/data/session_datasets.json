@@ -1,0 +1,11 @@
+{
+  "sess_test_verify_001": {
+    "source": "custom",
+    "filename": "test_data.csv",
+    "sku_count": 2,
+    "record_count": 314,
+    "date_range_start": "2022-01-03",
+    "date_range_end": "2024-12-30",
+    "uploaded_at": "2026-05-31T13:33:24.662204"
+  }
+}
