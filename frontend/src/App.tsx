@@ -23,6 +23,7 @@ const Upload = lazy(() => import('./pages/Upload'))
 const Landing = lazy(() => import('./pages/Landing'))
 const AnomalyDetection = lazy(() => import('./pages/AnomalyDetection'))
 const SupplyDemandGap = lazy(() => import('./pages/SupplyDemandGap'))
+const DemandPlanning = lazy(() => import('./pages/DemandPlanning'))
 
 // ---- Name Gate -------------------------------------------------------
 
@@ -296,6 +297,7 @@ function App() {
           <Route path="/upload" element={<AppShell title="Upload Data"><Upload /></AppShell>} />
           <Route path="/anomaly" element={<AppShell title="Anomaly Detection"><AnomalyDetection /></AppShell>} />
           <Route path="/supply-gap" element={<AppShell title="Supply-Demand Gap"><SupplyDemandGap /></AppShell>} />
+          <Route path="/demand-planning" element={<AppShell title="Demand Planning"><DemandPlanning /></AppShell>} />
         </Routes>
       </Suspense>
     </BrowserRouter>

@@ -543,6 +543,27 @@ export const supplyGapApi = {
   getWaterfall: (skuId: number) => api.get<WaterfallPoint[]>(`/supply-gap/skus/${skuId}/waterfall`),
 }
 
+// ------------------------------------------------------------------ //
+// Demand Planning                                                     //
+// ------------------------------------------------------------------ //
+
+export const demandPlanningApi = {
+  getSummary: () => api.get('/demand-planning/summary'),
+  getSkus: () => api.get('/demand-planning/skus'),
+  override: (skuId: number, periodMonth: string, overrideValue: number, reason: string) =>
+    api.post('/demand-planning/override', { sku_id: skuId, period_month: periodMonth, override_value: overrideValue, reason }),
+  submit: (skuId: number, periodMonth: string) =>
+    api.post('/demand-planning/submit', { sku_id: skuId, period_month: periodMonth }),
+  approve: (skuId: number, periodMonth: string) =>
+    api.post('/demand-planning/approve', { sku_id: skuId, period_month: periodMonth }),
+  reject: (skuId: number, periodMonth: string, reason: string) =>
+    api.post('/demand-planning/reject', { sku_id: skuId, period_month: periodMonth, reason }),
+  reset: (skuId: number, periodMonth: string) =>
+    api.post('/demand-planning/reset', { sku_id: skuId, period_month: periodMonth }),
+  getHistory: (skuId: number, periodMonth: string) =>
+    api.get(`/demand-planning/skus/${skuId}/history?period_month=${periodMonth}`),
+}
+
 export const uploadApi = {
   uploadFile: (file: File) => {
     const form = new FormData()

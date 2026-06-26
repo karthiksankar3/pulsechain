@@ -7,9 +7,30 @@ from sqlalchemy import inspect, text
 
 from app.core.config import get_settings
 from app.core.database import Base, SessionLocal, engine
-from app.routers import anomaly, auth, forecasting, inventory, scenarios, social, sop, supply_gap, upload
+from app.routers import anomaly, auth, demand_planning, forecasting, inventory, scenarios, social, sop, supply_gap, upload
 
 settings = get_settings()
+
+
+def ensure_demand_plan_tables() -> None:
+    """Create demand_plans and demand_plan_history tables if they don't exist."""
+    from app.models.demand_plan import DemandPlan
+    from app.models.demand_plan_history import DemandPlanHistory
+    try:
+        inspector = inspect(engine)
+        existing = inspector.get_table_names()
+        tables_to_create = []
+        if "demand_plans" not in existing:
+            tables_to_create.append(DemandPlan.__table__)
+        if "demand_plan_history" not in existing:
+            tables_to_create.append(DemandPlanHistory.__table__)
+        if tables_to_create:
+            Base.metadata.create_all(bind=engine, tables=tables_to_create)
+            print(f"✅ Created tables: {[t.name for t in tables_to_create]}")
+        else:
+            print("✓ demand_plans and demand_plan_history already exist")
+    except Exception as exc:
+        print(f"⚠️  ensure_demand_plan_tables failed (non-fatal): {exc}")
 
 
 def ensure_session_columns() -> None:
@@ -43,6 +64,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     try:
         print("🚀 PulseChain startup — ensuring schema...")
+        ensure_demand_plan_tables()
         ensure_session_columns()
         print("✅ Schema check complete.")
     except Exception as exc:
@@ -80,6 +102,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(anomaly.router)
+app.include_router(demand_planning.router)
 app.include_router(forecasting.router)
 app.include_router(inventory.router)
 app.include_router(social.router)

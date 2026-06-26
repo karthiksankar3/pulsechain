@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: 'Supply-Demand Gap', path: '/supply-gap',  icon: '📊' },
   { label: 'MarketPulse',      path: '/pharma-pulse', icon: '🔥' },
   { label: 'Scenarios',       path: '/scenarios',    icon: '🔀' },
+  { label: 'Demand Planning', path: '/demand-planning', icon: '🗂️' },
   { label: 'S&OP Console',    path: '/sop',          icon: '📋' },
   { label: 'Upload Data',     path: '/upload',       icon: '⬆️' },
 ]
