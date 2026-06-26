@@ -58,15 +58,27 @@ def _get_ensemble_forecasts(sku_id: int, session_id: str, db: Session) -> list[t
 
 
 def _sales_monthly_avg(sku_id: int, session_id: str, db: Session) -> float:
-    """90-day average daily sales → monthly estimate."""
-    cutoff = date.today() - timedelta(days=90)
+    """90-day average daily sales anchored to MAX(sale_date) → monthly estimate.
+
+    Uses the dataset's own latest date as the reference so demo data (which ends
+    in 2019) returns sensible values regardless of the real calendar date.
+    """
     for sid in ([session_id, "demo"] if session_id != "demo" else ["demo"]):
+        max_date = (
+            db.query(func.max(SalesRecord.sale_date))
+            .filter(SalesRecord.sku_id == sku_id, SalesRecord.session_id == sid)
+            .scalar()
+        )
+        if max_date is None:
+            continue
+        cutoff = max_date - timedelta(days=90)
         rows = (
             db.query(func.sum(SalesRecord.quantity), func.count(SalesRecord.id))
             .filter(
                 SalesRecord.sku_id == sku_id,
                 SalesRecord.session_id == sid,
                 SalesRecord.sale_date >= cutoff,
+                SalesRecord.sale_date <= max_date,
             )
             .first()
         )
@@ -142,6 +154,11 @@ def get_monthly_buckets(
     daily_rows = _get_ensemble_forecasts(sku_id, session_id, db)
     if daily_rows:
         monthly_totals = _aggregate_monthly(daily_rows, month_starts)
+        # Ensemble forecast dates may be 2019-era (projected from training data end),
+        # which won't match the current 2026 month buckets — detect and handle.
+        if all(v == 0.0 for v in monthly_totals.values()):
+            daily_avg = sum(qty for _, qty in daily_rows) / max(len(daily_rows), 1)
+            monthly_totals = {m: daily_avg * 30.0 for m in month_starts}
     else:
         fallback = _sales_monthly_avg(sku_id, session_id, db)
         monthly_totals = {m: fallback for m in month_starts}
@@ -172,6 +189,10 @@ def get_monthly_buckets(
             )
             db.add(plan)
             db.flush()
+        elif plan.system_forecast == 0.0 and sys_fc > 0.0 and plan.override_value is None:
+            # Correct rows that were persisted with system_forecast=0 on an earlier broken call.
+            plan.system_forecast = sys_fc
+            plan.final_value = sys_fc
 
         result.append({
             "period_month": plan.period_month.isoformat(),
